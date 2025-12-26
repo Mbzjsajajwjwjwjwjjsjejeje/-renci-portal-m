@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
     <title>Öğrenci Portalım v18.0</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -15,6 +15,57 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
+        /* --- MOBİL UYUM KODLARI BAŞLANGICI --- */
+@media screen and (max-width: 768px) {
+    
+    /* 1. Yan yana duran her şeyi alt alta indir */
+    body, .main-container, .container, .wrapper {
+        display: flex;
+        flex-direction: column !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* 2. Sol Menüyü (Sidebar) Üst Menü yap veya küçült */
+    .sidebar, .menu, nav {
+        width: 100% !important;
+        height: auto !important;
+        position: relative !important;
+        display: block !important;
+        margin-bottom: 20px;
+    }
+
+    /* 3. Ana İçerik Alanını Genişlet */
+    .content, .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 10px !important;
+        box-sizing: border-box; /* Kutuların taşmasını engeller */
+    }
+
+    /* 4. SATRANÇ VE GÖREVLER (Iframe ve Tablolar) */
+    iframe, object, embed {
+        width: 100% !important; /* Tahta ekrana sığsın */
+        height: 400px !important; /* Yüksekliği ayarlayalım */
+        border: none;
+    }
+
+    /* 5. ŞİKAYET KUTULARI (Formlar) */
+    input, textarea, select, button {
+        width: 100% !important; /* Kutular tam genişlik olsun */
+        font-size: 16px !important; /* Telefondan rahat okunur */
+        padding: 10px !important;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+
+    /* 6. Yazı boyutlarını telefona göre ayarla */
+    h1 { font-size: 24px !important; }
+    h2 { font-size: 20px !important; }
+    p, li { font-size: 16px !important; }
+}
+/* --- MOBİL UYUM KODLARI BİTİŞİ --- */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
 
         :root { --primary: #6c5ce7; --secondary: #a29bfe; --bg: #dfe6e9; --panel: #fff; --text: #2d3436; --danger: #d63031; --success: #00b894; --sidebar-bg: rgba(0,0,0,0.03); }
@@ -467,4 +518,5 @@ const firebaseConfig = {
         }
     </script>
 </body>
+
 </html>
