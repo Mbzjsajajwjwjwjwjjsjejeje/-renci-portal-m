@@ -228,15 +228,27 @@
 
     <script>
         // --- BURAYI KENDİ BİLGİLERİNLE DOLDUR ---
-        const firebaseConfig = {
-          "apiKey": "AIzaSysH1Dxw7Ll1733UKZTGEWt9qUvI4VvdyFw",
-          "authDomain": "portal-.firebaseapp.com",
-          "projectId": "portal-",
-          "storageBucket": "portal-.appspot.com",
-          "messagingSenderId": "495203320109",
-          "appId": "1:861417473624:web:f24oKV",
-          "measurementId": "G-7WKTYEVACX"
-        };
+      // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDxsw-OTjvlrPvscjO4LsGzKEceKOW-Iuc",
+  authDomain: "ogrenci-portali-f4cad.firebaseapp.com",
+  projectId: "ogrenci-portali-f4cad",
+  storageBucket: "ogrenci-portali-f4cad.firebasestorage.app",
+  messagingSenderId: "901945087688",
+  appId: "1:901945087688:web:24f1a877f49a15edc577fd",
+  measurementId: "G-JEL3H6H45T"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
         // ----------------------------------------
 
         firebase.initializeApp(firebaseConfig);
@@ -541,3 +553,4 @@
     </script>
 </body>
 </html>
+
