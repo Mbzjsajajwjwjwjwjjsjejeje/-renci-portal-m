@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>Öğrenci Portalım v18.0</title>
+    <title>Öğrenci Portalım v19.0 (Cloud)</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -12,110 +12,36 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* --- MOBİL UYUM KODLARI BAŞLANGICI --- */
-@media screen and (max-width: 768px) {
-    
-    /* 1. Yan yana duran her şeyi alt alta indir */
-    body, .main-container, .container, .wrapper {
-        display: flex;
-        flex-direction: column !important;
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
+        /* --- MOBİL UYUM KODLARI --- */
+        @media screen and (max-width: 768px) {
+            body, .main-container, .container, .wrapper { display: flex; flex-direction: column !important; width: 100% !important; padding: 0 !important; margin: 0 !important; }
+            .sidebar, .menu, nav { width: 100% !important; height: auto !important; position: relative !important; display: block !important; margin-bottom: 20px; }
+            .content, .main-content { margin-left: 0 !important; width: 100% !important; padding: 10px !important; box-sizing: border-box; }
+            iframe, object, embed { width: 100% !important; height: 400px !important; border: none; }
+            input, textarea, select, button { width: 100% !important; font-size: 16px !important; padding: 10px !important; box-sizing: border-box; margin-bottom: 10px; }
+            h1 { font-size: 24px !important; } h2 { font-size: 20px !important; } p, li { font-size: 16px !important; }
+            .auth-box { width: 90% !important; margin: auto; }
+            #myBoard { width: 300px !important; }
+        }
 
-    /* 2. Sol Menüyü (Sidebar) Üst Menü yap veya küçült */
-    .sidebar, .menu, nav {
-        width: 100% !important;
-        height: auto !important;
-        position: relative !important;
-        display: block !important;
-        margin-bottom: 20px;
-    }
-
-    /* 3. Ana İçerik Alanını Genişlet */
-    .content, .main-content {
-        margin-left: 0 !important;
-        width: 100% !important;
-        padding: 10px !important;
-        box-sizing: border-box; /* Kutuların taşmasını engeller */
-    }
-
-    /* 4. SATRANÇ VE GÖREVLER (Iframe ve Tablolar) */
-    iframe, object, embed {
-        width: 100% !important; /* Tahta ekrana sığsın */
-        height: 400px !important; /* Yüksekliği ayarlayalım */
-        border: none;
-    }
-
-    /* 5. ŞİKAYET KUTULARI (Formlar) */
-    input, textarea, select, button {
-        width: 100% !important; /* Kutular tam genişlik olsun */
-        font-size: 16px !important; /* Telefondan rahat okunur */
-        padding: 10px !important;
-        box-sizing: border-box;
-        margin-bottom: 10px;
-    }
-
-    /* 6. Yazı boyutlarını telefona göre ayarla */
-    h1 { font-size: 24px !important; }
-    h2 { font-size: 20px !important; }
-    p, li { font-size: 16px !important; }
-}
-/* --- MOBİL UYUM KODLARI BİTİŞİ --- */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-
         :root { --primary: #6c5ce7; --secondary: #a29bfe; --bg: #dfe6e9; --panel: #fff; --text: #2d3436; --danger: #d63031; --success: #00b894; --sidebar-bg: rgba(0,0,0,0.03); }
-        
-        body.koyu-mod { 
-            --primary: #a29bfe; --secondary: #6c5ce7; 
-            --panel: #2d3436; --text: #dfe6e9; 
-            --sidebar-bg: rgba(255,255,255,0.05);
-        }
-        
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); 
-            transition: background 0.5s;
-        }
-
-        body.koyu-mod {
-            background: linear-gradient(-45deg, #2c3e50, #000000, #434343);
-            background-size: 400% 400%;
-        }
-
+        body.koyu-mod { --primary: #a29bfe; --secondary: #6c5ce7; --panel: #2d3436; --text: #dfe6e9; --sidebar-bg: rgba(255,255,255,0.05); }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); background-size: 400% 400%; animation: gradientBG 15s ease infinite; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); transition: background 0.5s; }
+        body.koyu-mod { background: linear-gradient(-45deg, #2c3e50, #000000, #434343); background-size: 400% 400%; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         .container { background: var(--panel); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; transition: 0.3s; }
-        
-        .auth-box { 
-            padding: 50px 40px; width: 380px; text-align: center;
-            background: rgba(255, 255, 255, 0.25);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.18); color: white; 
-        }
+        .auth-box { padding: 50px 40px; width: 380px; text-align: center; background: rgba(255, 255, 255, 0.25); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.18); color: white; }
         .auth-box input { background: rgba(255, 255, 255, 0.9); border: none; padding: 15px; margin-bottom: 15px; border-radius: 30px; width: 100%; box-sizing: border-box; outline: none; transition: 0.3s; }
         .auth-box input:focus { transform: scale(1.05); }
         .auth-box button { background: linear-gradient(to right, #6c5ce7, #a29bfe); border: none; padding: 15px; border-radius: 30px; width: 100%; color: white; cursor: pointer; font-weight: bold; transition: 0.3s; }
         .auth-box button:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 
         .app-box { width: 1200px; height: 800px; display: flex; background: var(--panel); }
-        
-        @media screen and (max-width: 768px) {
-            .app-box { flex-direction: column; width: 100%; height: 100%; }
-            .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; padding: 10px; }
-            .content { padding: 15px; }
-            #myBoard { width: 300px !important; }
-            .auth-box { width: 90%; }
-        }
-
         .sidebar { width: 240px; background: var(--sidebar-bg); padding: 20px; display: flex; flex-direction: column; gap: 8px; border-right: 1px solid rgba(0,0,0,0.05); }
         .content { flex: 1; padding: 30px; overflow-y: auto; }
         
@@ -143,24 +69,14 @@
         th, td { border: 1px solid #eee; padding: 10px; text-align: center; font-size: 13px; }
         body.koyu-mod th, body.koyu-mod td { border-color: #444; }
         th { background: rgba(0,0,0,0.05); }
-        body.koyu-mod th { background: rgba(255,255,255,0.05); }
-        .ders-input { border: none; background: transparent; text-align: center; width: 100%; outline: none; color: inherit; }
-
-        #beklemeEkrani {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.9); z-index: 99;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
+        
+        #beklemeEkrani { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 99; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         body.koyu-mod #beklemeEkrani { background: rgba(30,30,30,0.95); }
         .spinner { border: 5px solid #f3f3f3; border-top: 5px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin-bottom: 20px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #geriSayimText { font-size: 80px; font-weight: bold; color: var(--primary); animation: pop 0.5s ease; }
-        @keyframes pop { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
         .dashboard-card { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 20px; border-radius: 15px; flex: 1; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin: 10px; }
-        .dashboard-card h3 { font-size: 36px; margin: 10px 0; }
         .dashboard-container { display: flex; flex-wrap: wrap; justify-content: space-between; }
-
         .pomodoro-circle { width: 200px; height: 200px; border-radius: 50%; border: 5px solid var(--primary); display: flex; justify-content: center; align-items: center; font-size: 40px; font-weight: bold; margin: 20px auto; color: var(--primary); }
     </style>
 </head>
@@ -168,9 +84,12 @@
 
     <div id="authScreen" class="auth-box">
         <h2 style="font-size: 28px; margin-bottom: 20px;"><i class="fas fa-graduation-cap"></i> Öğrenci Portalı</h2>
-        <input type="text" id="kAdi" placeholder="Kullanıcı Adı">
-        <input type="password" id="sifre" placeholder="Şifre">
+        <input type="email" id="emailInput" placeholder="E-Posta Adresi (örn: ahmet@gmail.com)">
+        <input type="password" id="sifreInput" placeholder="Şifre">
         <button onclick="islemYap()">Giriş Yap</button>
+        
+        <p onclick="sifreSifirla()" style="cursor: pointer; color: #fff; text-decoration: underline; margin-top: 10px; font-size: 14px;">Şifremi Unuttum?</p>
+        
         <p onclick="modDegistir()" style="cursor:pointer; font-size:13px; margin-top:15px; text-decoration: underline;">Hesabın yok mu? Kayıt Ol</p>
     </div>
 
@@ -195,7 +114,7 @@
                     <button onclick="document.getElementById('yedekYukleInput').click()" style="width:100%; font-size:11px; background:#0984e3; border:none; padding:5px; color:white; border-radius:3px; cursor:pointer; margin-top:5px;">📂 Yedek Yükle</button>
                 </div>
                 <button onclick="koyuModToggle()" style="background:#2d3436; color:white; padding:8px; font-size:12px; margin-top:10px; border:none; width:100%; border-radius:5px;">🌗 Mod Değiştir</button>
-                <button onclick="location.reload()" style="background:#ff7675; color:white; padding:8px; font-size:12px; margin-top:5px; border:none; width:100%; border-radius:5px;">Çıkış</button>
+                <button onclick="cikisYap()" style="background:#ff7675; color:white; padding:8px; font-size:12px; margin-top:5px; border:none; width:100%; border-radius:5px;">Çıkış</button>
             </div>
         </div>
 
@@ -302,19 +221,20 @@
 
     <script>
         // --- BURAYI KENDİ BİLGİLERİNLE DOLDUR ---
-const firebaseConfig = {
-  "apiKey": "AIzaSysH1Dxw7Ll1733UKZTGEWt9qUvI4VvdyFw",
-  "authDomain": "portal-.firebaseapp.com",
-  "projectId": "portal-",
-  "storageBucket": "portal-.appspot.com",
-  "messagingSenderId": "495203320109",
-  "appId": "1:861417473624:web:f24oKV",
-  "measurementId": "G-7WKTYEVACX"
-};
+        const firebaseConfig = {
+          "apiKey": "AIzaSysH1Dxw7Ll1733UKZTGEWt9qUvI4VvdyFw",
+          "authDomain": "portal-.firebaseapp.com",
+          "projectId": "portal-",
+          "storageBucket": "portal-.appspot.com",
+          "messagingSenderId": "495203320109",
+          "appId": "1:861417473624:web:f24oKV",
+          "measurementId": "G-7WKTYEVACX"
+        };
         // ----------------------------------------
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
+        const auth = firebase.auth(); // AUTH Servisi Başlatıldı
 
         let user = null, kayit = false;
         let board = null, game = new Chess();
@@ -325,23 +245,81 @@ const firebaseConfig = {
 
         if(localStorage.getItem("koyuMod") === "1") document.body.classList.add("koyu-mod");
 
-        function modDegistir() { kayit=!kayit; document.querySelector("#authScreen h2").innerText=kayit?"Kayıt Ol":"Öğrenci Portalı"; }
-        function islemYap() {
-            let k=document.getElementById("kAdi").value, s=document.getElementById("sifre").value;
-            if(!k||!s) return alert("Boş bırakma!");
-            if(kayit) {
-                if(localStorage.getItem("u_"+k)) return alert("Bu kullanıcı adı alınmış!");
-                localStorage.setItem("u_"+k, s); localStorage.setItem("puan_"+k, 0); alert("Kayıt Başarılı!"); modDegistir();
+        // --- AUTH & GİRİŞ İŞLEMLERİ (YENİ) ---
+        
+        // Site açıldığında, kullanıcı daha önce giriş yapmış mı kontrol et
+        auth.onAuthStateChanged(function(firebaseUser) {
+            if (firebaseUser) {
+                // Giriş yapılmış
+                // E-posta adresinin @ işaretinden önceki kısmını kullanıcı adı yapıyoruz
+                user = firebaseUser.email.split('@')[0];
+                console.log("Giriş yapıldı: " + user);
+                
+                document.getElementById("authScreen").classList.add("gizli");
+                document.getElementById("appScreen").classList.remove("gizli");
+                document.getElementById("karsilama").innerText="👤 " + user;
+                yukle();
+                baslatSohbetDinleyici();
             } else {
-                if(localStorage.getItem("u_"+k)==s) {
-                    user=k; document.getElementById("authScreen").classList.add("gizli");
-                    document.getElementById("appScreen").classList.remove("gizli");
-                    document.getElementById("karsilama").innerText="👤 "+user;
-                    yukle();
-                    baslatSohbetDinleyici();
-                } else alert("Hatalı kullanıcı adı veya şifre!");
+                // Çıkış yapılmış
+                document.getElementById("authScreen").classList.remove("gizli");
+                document.getElementById("appScreen").classList.add("gizli");
+            }
+        });
+
+        function modDegistir() { 
+            kayit=!kayit; 
+            document.querySelector("#authScreen h2").innerText = kayit ? "Kayıt Ol" : "Öğrenci Portalı"; 
+        }
+
+        function islemYap() {
+            let email = document.getElementById("emailInput").value;
+            let pass = document.getElementById("sifreInput").value;
+
+            if(!email || !pass) return alert("Lütfen E-Posta ve Şifre girin!");
+
+            if(kayit) {
+                // KAYIT OL
+                auth.createUserWithEmailAndPassword(email, pass)
+                    .then((userCredential) => {
+                        alert("Kayıt Başarılı! Şimdi giriş yapılıyor...");
+                        // Otomatik giriş yapar, onAuthStateChanged tetiklenir
+                    })
+                    .catch((error) => {
+                        alert("Hata: " + error.message);
+                    });
+            } else {
+                // GİRİŞ YAP
+                auth.signInWithEmailAndPassword(email, pass)
+                    .then((userCredential) => {
+                        // Başarılı giriş, onAuthStateChanged tetiklenir
+                    })
+                    .catch((error) => {
+                        alert("Giriş Hatası: " + error.message);
+                    });
             }
         }
+
+        function cikisYap() {
+            auth.signOut().then(() => {
+                location.reload();
+            });
+        }
+
+        // --- ŞİFRE SIFIRLAMA FONKSİYONU ---
+        function sifreSifirla() {
+            let email = prompt("Şifre sıfırlama bağlantısı gönderilecek E-Posta adresinizi girin:");
+            if (email) {
+                auth.sendPasswordResetEmail(email)
+                    .then(function() {
+                        alert("✅ E-Posta gönderildi! Lütfen gelen kutunuzu (ve spam klasörünü) kontrol edin.");
+                    })
+                    .catch(function(error) {
+                        alert("❌ Hata: " + error.message);
+                    });
+            }
+        }
+
         function sayfaGec(id) { document.querySelectorAll(".page").forEach(p=>p.classList.remove("active")); document.querySelectorAll(".menu-item").forEach(m=>m.classList.remove("active")); document.getElementById(id).classList.add("active"); event.currentTarget.classList.add("active"); yukle(); }
         function koyuModToggle() { document.body.classList.toggle("koyu-mod"); localStorage.setItem("koyuMod", document.body.classList.contains("koyu-mod") ? "1" : "0"); }
         function getVeri(key) { return JSON.parse(localStorage.getItem(key+"_"+user)||"[]"); }
@@ -491,11 +469,9 @@ const firebaseConfig = {
 
         // --- ONLINE SOHBET ---
         function baslatSohbetDinleyici() {
-            // Sadece bugünün mesajlarını göster
             let bugun = new Date().toLocaleDateString();
             database.ref('chat').on('child_added', s => {
                 let m = s.val();
-                // Eğer mesajın tarihi bugüne eşitse ekrana bas, değilse basma
                 if(m.tarih === bugun) {
                     let div = `<div style="margin:5px;padding:5px;border-radius:5px;background:${m.u===user?'var(--primary)':'#eee'};color:${m.u===user?'white':'black'};width:fit-content;margin-left:${m.u===user?'auto':'0'}"><b>${m.u}:</b> ${m.t}</div>`;
                     document.getElementById("chatArea").innerHTML += div;
@@ -505,7 +481,6 @@ const firebaseConfig = {
         }
         function chatYolla() {
             let t = document.getElementById("chatIn").value; if(!t) return;
-            // Mesajı atarken bugünün tarihini de ekle
             database.ref('chat').push({ u: user, t: t, tarih: new Date().toLocaleDateString() });
             document.getElementById("chatIn").value = "";
         }
@@ -518,5 +493,4 @@ const firebaseConfig = {
         }
     </script>
 </body>
-
 </html>
