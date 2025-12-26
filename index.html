@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>Öğrenci Portalım (Final - V22)</title>
+    <title>Öğrenci Portalım (Hazır - V23)</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -204,19 +204,19 @@
     </div>
 
     <script>
-        // --- 🔥 DİKKAT: BURASI BOŞ! KENDİ KODLARINI YAPIŞTIR 🔥 ---
+        // --- 🔥 SENİN API KODLARIN (İÇİNE YERLEŞTİRİLDİ) 🔥 ---
         const firebaseConfig = {
-            // ... Buraya Firebase'den kopyaladığın kodu yapıştır ...
+          apiKey: "AIzaSyDxsw-OTjvlrPvscjO4LsGzKEceKOW-Iuc",
+          authDomain: "ogrenci-portali-f4cad.firebaseapp.com",
+          projectId: "ogrenci-portali-f4cad",
+          storageBucket: "ogrenci-portali-f4cad.firebasestorage.app",
+          messagingSenderId: "901945087688",
+          appId: "1:901945087688:web:24f1a877f49a15edc577fd",
+          measurementId: "G-JEL3H6H45T"
         };
         // -----------------------------------------------------------
 
-        // GÜVENLİK KONTROLÜ: Anahtarlar girilmemişse uyarı ver
-        try {
-            firebase.initializeApp(firebaseConfig);
-        } catch (e) {
-            alert("HATA: Firebase API Anahtarlarını yapıştırmayı unuttun! Kodun en altına bak.");
-        }
-
+        firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const auth = firebase.auth();
         let user = null, kayit = false;
