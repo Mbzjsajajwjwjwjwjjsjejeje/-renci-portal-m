@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>Öğrenci Portalım (Tam Sürüm + Kolay Giriş)</title>
+    <title>Öğrenci Portalım v19.0 (Cloud)</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -12,8 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> 
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         /* --- MOBİL UYUM KODLARI --- */
@@ -31,17 +30,16 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
         :root { --primary: #6c5ce7; --secondary: #a29bfe; --bg: #dfe6e9; --panel: #fff; --text: #2d3436; --danger: #d63031; --success: #00b894; --sidebar-bg: rgba(0,0,0,0.03); }
         body.koyu-mod { --primary: #a29bfe; --secondary: #6c5ce7; --panel: #2d3436; --text: #dfe6e9; --sidebar-bg: rgba(255,255,255,0.05); }
-        body { font-family: 'Poppins', sans-serif; background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); background-size: 400% 400%; animation: gradientBG 15s ease infinite; margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); transition: background 0.5s; }
+        body { font-family: 'Poppins', sans-serif; background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); background-size: 400% 400%; animation: gradientBG 15s ease infinite; margin: 0; height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text); transition: background 0.5s; }
+        body.koyu-mod { background: linear-gradient(-45deg, #2c3e50, #000000, #434343); background-size: 400% 400%; }
         @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
         .container { background: var(--panel); border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; transition: 0.3s; }
-        
-        /* GİRİŞ EKRANI (Overlay) */
-        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:999; display:flex; justify-content:center; align-items:center; }
-        .auth-box { padding: 40px; width: 350px; text-align: center; background: rgba(255, 255, 255, 0.95); border-radius: 20px; color: #333; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        .auth-box input { background: #eee; border: none; padding: 15px; margin-bottom: 10px; border-radius: 30px; width: 100%; box-sizing: border-box; outline: none; }
-        .auth-box button { background: linear-gradient(to right, #6c5ce7, #a29bfe); border: none; padding: 15px; border-radius: 30px; width: 100%; color: white; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; }
-        .auth-box button:hover { transform: scale(1.05); }
+        .auth-box { padding: 50px 40px; width: 380px; text-align: center; background: rgba(255, 255, 255, 0.25); box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.18); color: white; }
+        .auth-box input { background: rgba(255, 255, 255, 0.9); border: none; padding: 15px; margin-bottom: 15px; border-radius: 30px; width: 100%; box-sizing: border-box; outline: none; transition: 0.3s; }
+        .auth-box input:focus { transform: scale(1.05); }
+        .auth-box button { background: linear-gradient(to right, #6c5ce7, #a29bfe); border: none; padding: 15px; border-radius: 30px; width: 100%; color: white; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .auth-box button:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 
         .app-box { width: 1200px; height: 800px; display: flex; background: var(--panel); }
         .sidebar { width: 240px; background: var(--sidebar-bg); padding: 20px; display: flex; flex-direction: column; gap: 8px; border-right: 1px solid rgba(0,0,0,0.05); }
@@ -84,25 +82,15 @@
 </head>
 <body>
 
-    <div id="authScreen" class="overlay">
-        <div class="auth-box">
-            <h2 id="authTitle" style="color:#2d3436; margin-bottom:20px;">Giriş Yap</h2>
-            <input type="email" id="emailInput" placeholder="E-Posta Adresi">
-            <input type="password" id="sifreInput" placeholder="Şifre">
-            <button onclick="islemYap()" id="btnIslem">Giriş Yap</button>
-
-            <p onclick="sifreSifirla()" style="cursor: pointer; color: #0984e3; text-decoration: underline; margin-top: 15px; font-size: 13px;">Şifremi Unuttum</p>
-            <p onclick="modDegistir()" id="toggleText" style="cursor:pointer; font-size:14px; margin-top:15px; font-weight:bold; color:#2d3436;">Hesabın yok mu? Kayıt Ol</p>
-        </div>
-    </div>
-
-    <div id="nameScreen" class="overlay gizli">
-        <div class="auth-box">
-            <h2 style="color:#2d3436;">👋 Hoşgeldin!</h2>
-            <p style="color:#2d3436;">Seni nasıl çağıralım?</p>
-            <input type="text" id="newNameInput" placeholder="Takma Adın (Örn: KralOyuncu)">
-            <button onclick="isimKaydet()">Devam Et</button>
-        </div>
+    <div id="authScreen" class="auth-box">
+        <h2 style="font-size: 28px; margin-bottom: 20px;"><i class="fas fa-graduation-cap"></i> Öğrenci Portalı</h2>
+        <input type="email" id="emailInput" placeholder="E-Posta Adresi (örn: ahmet@gmail.com)">
+        <input type="password" id="sifreInput" placeholder="Şifre">
+        <button onclick="islemYap()">Giriş Yap</button>
+        
+        <p onclick="sifreSifirla()" style="cursor: pointer; color: #fff; text-decoration: underline; margin-top: 10px; font-size: 14px;">Şifremi Unuttum?</p>
+        
+        <p onclick="modDegistir()" style="cursor:pointer; font-size:13px; margin-top:15px; text-decoration: underline;">Hesabın yok mu? Kayıt Ol</p>
     </div>
 
     <div id="appScreen" class="container app-box gizli">
@@ -232,22 +220,35 @@
     </div>
 
     <script>
-        // --- 🔥 SENİN API KODLARIN (OTOMATİK EKLENDİ) 🔥 ---
-        const firebaseConfig = {
-          apiKey: "AIzaSyDxsw-OTjvlrPvscjO4LsGzKEceKOW-Iuc",
-          authDomain: "ogrenci-portali-f4cad.firebaseapp.com",
-          projectId: "ogrenci-portali-f4cad",
-          storageBucket: "ogrenci-portali-f4cad.firebasestorage.app",
-          messagingSenderId: "901945087688",
-          appId: "1:901945087688:web:24f1a877f49a15edc577fd",
-          measurementId: "G-JEL3H6H45T"
-        };
-        // ---------------------------------------------------
+        // --- BURAYI KENDİ BİLGİLERİNLE DOLDUR ---
+     // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDxsw-OTjvlrPvscjO4LsGzKEceKOW-Iuc",
+  authDomain: "ogrenci-portali-f4cad.firebaseapp.com",
+  projectId: "ogrenci-portali-f4cad",
+  storageBucket: "ogrenci-portali-f4cad.firebasestorage.app",
+  messagingSenderId: "901945087688",
+  appId: "1:901945087688:web:24f1a877f49a15edc577fd",
+  measurementId: "G-JEL3H6H45T"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+        // ----------------------------------------
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const auth = firebase.auth();
-        let user = null, kayit = false, uid = null;
+        const auth = firebase.auth(); // AUTH Servisi Başlatıldı
+
+        let user = null, kayit = false;
         let board = null, game = new Chess();
         let aktifMod = null;
         let wTime = 600, bTime = 600, timerInterval = null;
@@ -256,94 +257,81 @@
 
         if(localStorage.getItem("koyuMod") === "1") document.body.classList.add("koyu-mod");
 
-        // --- 1. MOD DEĞİŞTİRME ---
-        function modDegistir() { 
-            kayit = !kayit; 
-            document.getElementById("authTitle").innerText = kayit ? "Kayıt Ol" : "Giriş Yap";
-            document.getElementById("btnIslem").innerText = kayit ? "Kayıt Ol" : "Giriş Yap";
-            document.getElementById("toggleText").innerText = kayit ? "Zaten hesabın var mı? Giriş Yap" : "Hesabın yok mu? Kayıt Ol";
-        }
-
-        // --- 2. GİRİŞ & KAYIT İŞLEMİ ---
-        function islemYap() {
-            let email = document.getElementById("emailInput").value.trim();
-            let pass = document.getElementById("sifreInput").value;
-            
-            if(!email || !pass) return alert("E-Posta ve Şifre girin!");
-
-            if(kayit) {
-                // KAYIT
-                auth.createUserWithEmailAndPassword(email, pass)
-                    .then(() => alert("Kayıt Başarılı! Şimdi isim belirleyeceğiz..."))
-                    .catch(e => alert("Hata: " + e.message));
-            } else {
-                // GİRİŞ
-                auth.signInWithEmailAndPassword(email, pass)
-                    .catch(e => alert("Giriş Hatası: " + e.message));
-            }
-        }
-
-        // --- 3. OTOMATİK GİRİŞ KONTROLÜ ---
-        auth.onAuthStateChanged(firebaseUser => {
+        // --- AUTH & GİRİŞ İŞLEMLERİ (YENİ) ---
+        
+        // Site açıldığında, kullanıcı daha önce giriş yapmış mı kontrol et
+        auth.onAuthStateChanged(function(firebaseUser) {
             if (firebaseUser) {
-                uid = firebaseUser.uid;
+                // Giriş yapılmış
+                // E-posta adresinin @ işaretinden önceki kısmını kullanıcı adı yapıyoruz
+                user = firebaseUser.email.split('@')[0];
+                console.log("Giriş yapıldı: " + user);
+                
                 document.getElementById("authScreen").classList.add("gizli");
-
-                // Veritabanında ismi var mı diye kontrol et
-                database.ref('users/' + uid).once('value').then(snapshot => {
-                    if (snapshot.exists() && snapshot.val().username) {
-                        // Varsa siteyi aç
-                        baslatUygulama(snapshot.val().username);
-                    } else {
-                        // Yoksa isim sorma ekranını aç
-                        document.getElementById("nameScreen").classList.remove("gizli");
-                    }
-                });
+                document.getElementById("appScreen").classList.remove("gizli");
+                document.getElementById("karsilama").innerText="👤 " + user;
+                yukle();
+                baslatSohbetDinleyici();
             } else {
+                // Çıkış yapılmış
                 document.getElementById("authScreen").classList.remove("gizli");
                 document.getElementById("appScreen").classList.add("gizli");
-                document.getElementById("nameScreen").classList.add("gizli");
             }
         });
 
-        // --- 4. İSİM KAYDETME VE KONTROL ---
-        function isimKaydet() {
-            let name = document.getElementById("newNameInput").value.trim();
-            if(!name) return alert("Bir isim yazmalısın!");
+        function modDegistir() { 
+            kayit=!kayit; 
+            document.querySelector("#authScreen h2").innerText = kayit ? "Kayıt Ol" : "Öğrenci Portalı"; 
+        }
 
-            // İsim başkasında var mı?
-            database.ref('users').orderByChild('username').equalTo(name).once('value', snapshot => {
-                if (snapshot.exists()) {
-                    alert("Bu isim (" + name + ") başkası tarafından alınmış! Lütfen başka bir isim seç.");
-                } else {
-                    // Yoksa kaydet
-                    database.ref('users/' + uid).set({
-                        username: name,
-                        email: auth.currentUser.email
-                    }).then(() => {
-                        document.getElementById("nameScreen").classList.add("gizli");
-                        baslatUygulama(name);
+        function islemYap() {
+            let email = document.getElementById("emailInput").value;
+            let pass = document.getElementById("sifreInput").value;
+
+            if(!email || !pass) return alert("Lütfen E-Posta ve Şifre girin!");
+
+            if(kayit) {
+                // KAYIT OL
+                auth.createUserWithEmailAndPassword(email, pass)
+                    .then((userCredential) => {
+                        alert("Kayıt Başarılı! Şimdi giriş yapılıyor...");
+                        // Otomatik giriş yapar, onAuthStateChanged tetiklenir
+                    })
+                    .catch((error) => {
+                        alert("Hata: " + error.message);
                     });
-                }
+            } else {
+                // GİRİŞ YAP
+                auth.signInWithEmailAndPassword(email, pass)
+                    .then((userCredential) => {
+                        // Başarılı giriş, onAuthStateChanged tetiklenir
+                    })
+                    .catch((error) => {
+                        alert("Giriş Hatası: " + error.message);
+                    });
+            }
+        }
+
+        function cikisYap() {
+            auth.signOut().then(() => {
+                location.reload();
             });
         }
 
-        function baslatUygulama(isim) {
-            user = isim;
-            document.getElementById("appScreen").classList.remove("gizli");
-            document.getElementById("karsilama").innerText = "👤 " + user;
-            yukle(); // Tüm eski verileri yükle
-            baslatSohbetDinleyici();
-        }
-
-        function cikisYap() { auth.signOut().then(()=>location.reload()); }
-        
+        // --- ŞİFRE SIFIRLAMA FONKSİYONU ---
         function sifreSifirla() {
-            let m = prompt("E-Posta adresinizi girin:");
-            if(m) auth.sendPasswordResetEmail(m).then(()=>alert("Mail gönderildi!")).catch(e=>alert(e.message));
+            let email = prompt("Şifre sıfırlama bağlantısı gönderilecek E-Posta adresinizi girin:");
+            if (email) {
+                auth.sendPasswordResetEmail(email)
+                    .then(function() {
+                        alert("✅ E-Posta gönderildi! Lütfen gelen kutunuzu (ve spam klasörünü) kontrol edin.");
+                    })
+                    .catch(function(error) {
+                        alert("❌ Hata: " + error.message);
+                    });
+            }
         }
 
-        // --- ESKİ ÖZELLİKLERİN FONKSİYONLARI ---
         function sayfaGec(id) { document.querySelectorAll(".page").forEach(p=>p.classList.remove("active")); document.querySelectorAll(".menu-item").forEach(m=>m.classList.remove("active")); document.getElementById(id).classList.add("active"); event.currentTarget.classList.add("active"); yukle(); }
         function koyuModToggle() { document.body.classList.toggle("koyu-mod"); localStorage.setItem("koyuMod", document.body.classList.contains("koyu-mod") ? "1" : "0"); }
         function getVeri(key) { return JSON.parse(localStorage.getItem(key+"_"+user)||"[]"); }
