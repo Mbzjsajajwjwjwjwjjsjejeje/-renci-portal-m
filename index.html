@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>Öğrenci Portalım v19.0 (Cloud)</title>
+    <title>Öğrenci Portalım v20.0 (Kullanıcı Adı Girişli)</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -12,7 +12,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> 
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         /* --- MOBİL UYUM KODLARI --- */
@@ -84,13 +85,19 @@
 
     <div id="authScreen" class="auth-box">
         <h2 style="font-size: 28px; margin-bottom: 20px;"><i class="fas fa-graduation-cap"></i> Öğrenci Portalı</h2>
-        <input type="email" id="emailInput" placeholder="E-Posta Adresi (örn: ahmet@gmail.com)">
+        
+        <input type="text" id="kAdiInput" placeholder="Kullanıcı Adı">
+
+        <div id="emailDiv" class="gizli">
+            <input type="email" id="emailInput" placeholder="E-Posta (Şifre kurtarmak için)">
+        </div>
+
         <input type="password" id="sifreInput" placeholder="Şifre">
-        <button onclick="islemYap()">Giriş Yap</button>
+
+        <button onclick="islemYap()" id="btnIslem">Giriş Yap</button>
         
         <p onclick="sifreSifirla()" style="cursor: pointer; color: #fff; text-decoration: underline; margin-top: 10px; font-size: 14px;">Şifremi Unuttum?</p>
-        
-        <p onclick="modDegistir()" style="cursor:pointer; font-size:13px; margin-top:15px; text-decoration: underline;">Hesabın yok mu? Kayıt Ol</p>
+        <p onclick="modDegistir()" id="toggleText" style="cursor:pointer; font-size:13px; margin-top:15px; text-decoration: underline;">Hesabın yok mu? Kayıt Ol</p>
     </div>
 
     <div id="appScreen" class="container app-box gizli">
@@ -234,7 +241,7 @@
 
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const auth = firebase.auth(); // AUTH Servisi Başlatıldı
+        const auth = firebase.auth();
 
         let user = null, kayit = false;
         let board = null, game = new Chess();
@@ -245,68 +252,107 @@
 
         if(localStorage.getItem("koyuMod") === "1") document.body.classList.add("koyu-mod");
 
-        // --- AUTH & GİRİŞ İŞLEMLERİ (YENİ) ---
+        // --- AUTH & GİRİŞ İŞLEMLERİ (GÜNCELLENDİ: Kullanıcı Adı İle) ---
         
-        // Site açıldığında, kullanıcı daha önce giriş yapmış mı kontrol et
+        // 1. Mod Değiştirme (Giriş / Kayıt)
+        function modDegistir() { 
+            kayit = !kayit; 
+            // Kayıt modundaysak E-posta kutusunu aç, değilse gizle
+            if(kayit) {
+                document.getElementById("emailDiv").classList.remove("gizli");
+                document.querySelector("#authScreen h2").innerText = "Kayıt Ol";
+                document.getElementById("btnIslem").innerText = "Kayıt Ol";
+                document.getElementById("toggleText").innerText = "Zaten hesabın var mı? Giriş Yap";
+            } else {
+                document.getElementById("emailDiv").classList.add("gizli");
+                document.querySelector("#authScreen h2").innerText = "Giriş Yap";
+                document.getElementById("btnIslem").innerText = "Giriş Yap";
+                document.getElementById("toggleText").innerText = "Hesabın yok mu? Kayıt Ol";
+            }
+        }
+
+        // 2. İşlem Yap (Giriş veya Kayıt)
+        function islemYap() {
+            let kAdi = document.getElementById("kAdiInput").value.trim();
+            let pass = document.getElementById("sifreInput").value;
+            
+            if(!kAdi || !pass) return alert("Lütfen bilgileri doldurun!");
+
+            if(kayit) {
+                // --- KAYIT OLMA İŞLEMİ ---
+                let email = document.getElementById("emailInput").value.trim();
+                if(!email) return alert("Kayıt için E-Posta zorunludur!");
+
+                // Veritabanında bu kullanıcı adı var mı diye bak
+                database.ref('users').orderByChild('username').equalTo(kAdi).once('value', snapshot => {
+                    if (snapshot.exists()) {
+                        alert("Bu kullanıcı adı zaten alınmış! Başka bir tane seç.");
+                    } else {
+                        // Yoksa Firebase'e E-posta ile kayıt et
+                        auth.createUserWithEmailAndPassword(email, pass)
+                            .then((userCredential) => {
+                                // Kullanıcı adını veritabanına kaydet
+                                let uid = userCredential.user.uid;
+                                database.ref('users/' + uid).set({
+                                    username: kAdi,
+                                    email: email
+                                });
+                                alert("Kayıt Başarılı! Otomatik giriş yapılıyor...");
+                            })
+                            .catch((error) => { alert("Hata: " + error.message); });
+                    }
+                });
+
+            } else {
+                // --- GİRİŞ YAPMA İŞLEMİ (Kullanıcı Adı ile) ---
+                
+                // 1. Veritabanında bu Kullanıcı Adı'nı ara
+                database.ref('users').orderByChild('username').equalTo(kAdi).once('value', snapshot => {
+                    if (snapshot.exists()) {
+                        // 2. Bulduysak, o kullanıcının E-Postasını al
+                        let userData = Object.values(snapshot.val())[0];
+                        let email = userData.email;
+
+                        // 3. O e-posta ile Firebase'e giriş yap
+                        auth.signInWithEmailAndPassword(email, pass)
+                            .then(() => { console.log("Giriş Başarılı"); })
+                            .catch((error) => { alert("Şifre Hatalı!"); });
+                    } else {
+                        alert("Böyle bir kullanıcı adı bulunamadı!");
+                    }
+                });
+            }
+        }
+
+        // 3. Otomatik Giriş Kontrolü
         auth.onAuthStateChanged(function(firebaseUser) {
             if (firebaseUser) {
-                // Giriş yapılmış
-                // E-posta adresinin @ işaretinden önceki kısmını kullanıcı adı yapıyoruz
-                user = firebaseUser.email.split('@')[0];
-                console.log("Giriş yapıldı: " + user);
-                
-                document.getElementById("authScreen").classList.add("gizli");
-                document.getElementById("appScreen").classList.remove("gizli");
-                document.getElementById("karsilama").innerText="👤 " + user;
-                yukle();
-                baslatSohbetDinleyici();
+                // Giriş yapılmış, veritabanından ismi çekelim
+                database.ref('users/' + firebaseUser.uid).once('value').then(snapshot => {
+                    if(snapshot.exists()) {
+                        user = snapshot.val().username; // Veritabanındaki ismi kullan
+                    } else {
+                        user = firebaseUser.email.split('@')[0]; // Bulamazsa mail başını kullan
+                    }
+                    document.getElementById("authScreen").classList.add("gizli");
+                    document.getElementById("appScreen").classList.remove("gizli");
+                    document.getElementById("karsilama").innerText = "👤 " + user;
+                    yukle();
+                    baslatSohbetDinleyici();
+                });
             } else {
-                // Çıkış yapılmış
                 document.getElementById("authScreen").classList.remove("gizli");
                 document.getElementById("appScreen").classList.add("gizli");
             }
         });
-
-        function modDegistir() { 
-            kayit=!kayit; 
-            document.querySelector("#authScreen h2").innerText = kayit ? "Kayıt Ol" : "Öğrenci Portalı"; 
-        }
-
-        function islemYap() {
-            let email = document.getElementById("emailInput").value;
-            let pass = document.getElementById("sifreInput").value;
-
-            if(!email || !pass) return alert("Lütfen E-Posta ve Şifre girin!");
-
-            if(kayit) {
-                // KAYIT OL
-                auth.createUserWithEmailAndPassword(email, pass)
-                    .then((userCredential) => {
-                        alert("Kayıt Başarılı! Şimdi giriş yapılıyor...");
-                        // Otomatik giriş yapar, onAuthStateChanged tetiklenir
-                    })
-                    .catch((error) => {
-                        alert("Hata: " + error.message);
-                    });
-            } else {
-                // GİRİŞ YAP
-                auth.signInWithEmailAndPassword(email, pass)
-                    .then((userCredential) => {
-                        // Başarılı giriş, onAuthStateChanged tetiklenir
-                    })
-                    .catch((error) => {
-                        alert("Giriş Hatası: " + error.message);
-                    });
-            }
-        }
-
+        
         function cikisYap() {
             auth.signOut().then(() => {
                 location.reload();
             });
         }
 
-        // --- ŞİFRE SIFIRLAMA FONKSİYONU ---
+        // --- ŞİFRE SIFIRLAMA ---
         function sifreSifirla() {
             let email = prompt("Şifre sıfırlama bağlantısı gönderilecek E-Posta adresinizi girin:");
             if (email) {
@@ -320,6 +366,7 @@
             }
         }
 
+        // --- DİĞER FONKSİYONLAR (DEĞİŞMEDİ) ---
         function sayfaGec(id) { document.querySelectorAll(".page").forEach(p=>p.classList.remove("active")); document.querySelectorAll(".menu-item").forEach(m=>m.classList.remove("active")); document.getElementById(id).classList.add("active"); event.currentTarget.classList.add("active"); yukle(); }
         function koyuModToggle() { document.body.classList.toggle("koyu-mod"); localStorage.setItem("koyuMod", document.body.classList.contains("koyu-mod") ? "1" : "0"); }
         function getVeri(key) { return JSON.parse(localStorage.getItem(key+"_"+user)||"[]"); }
