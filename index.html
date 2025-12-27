@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>Öğrenci Portalım (Online - Sorunsuz)</title>
+    <title>Öğrenci Portalımv22.0</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -12,10 +12,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script> 
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        /* --- MOBİL UYUM KODLARI --- */
+        /* --- MOBİL UYUM VE TASARIM --- */
         @media screen and (max-width: 768px) {
             body, .container { flex-direction: column !important; width: 100% !important; padding: 0 !important; }
             .sidebar { width: 100% !important; height: auto !important; display: block !important; margin-bottom: 20px; }
@@ -75,11 +76,17 @@
         <div class="auth-box">
             <h2 id="authTitle" style="color:#2d3436; margin-bottom:20px;">Giriş Yap</h2>
             
-            <input type="text" id="kAdi" placeholder="Kullanıcı Adı">
-            <input type="password" id="sifre" placeholder="Şifre">
+            <input type="text" id="kAdiInput" placeholder="Kullanıcı Adı">
+            
+            <div id="emailDiv" class="gizli">
+                <input type="email" id="emailInput" placeholder="E-Posta Adresi">
+            </div>
+            
+            <input type="password" id="sifreInput" placeholder="Şifre">
             
             <button onclick="islemYap()" id="btnIslem">Giriş Yap</button>
 
+            <p onclick="sifreSifirla()" style="cursor: pointer; color: #0984e3; text-decoration: underline; margin-top: 15px; font-size: 13px;">Şifremi Unuttum</p>
             <p onclick="modDegistir()" id="toggleText" style="cursor:pointer; font-size:14px; margin-top:20px; font-weight:bold; color:#2d3436; text-decoration: underline;">Hesabın yok mu? Kayıt Ol</p>
         </div>
     </div>
@@ -97,7 +104,7 @@
             <div class="menu-item" onclick="sayfaGec('sohbet')"><i class="fas fa-comments"></i> Sohbet</div>
             <div style="margin-top:auto; text-align:center;">
                 <p id="karsilama" style="font-size:14px; font-weight:bold;"></p>
-                <button onclick="location.reload()" class="btn btn-kirmizi" style="width:100%;">Çıkış Yap</button>
+                <button onclick="cikisYap()" class="btn btn-kirmizi" style="width:100%;">Çıkış Yap</button>
             </div>
         </div>
 
@@ -202,67 +209,89 @@
     </div>
 
     <script>
-        // --- 🔥 BURAYA KENDİ KODLARINI YAPIŞTIR 🔥 ---
-        // (Bunu yapıştırmasan bile GİRİŞ ÇALIŞIR, ama sohbet/satranç çalışmaz)
+        // --- 🔥 SENİN ANAHTARLARIN (OTOMATİK YERLEŞTİRİLDİ) 🔥 ---
         const firebaseConfig = {
-            // ... API kodlarını buraya yapıştır ...
+          apiKey: "AIzaSyDxsw-OTjvlrPvscjO4LsGzKEceKOW-Iuc",
+          authDomain: "ogrenci-portali-f4cad.firebaseapp.com",
+          databaseURL: "https://ogrenci-portali-f4cad-default-rtdb.firebaseio.com",
+          projectId: "ogrenci-portali-f4cad",
+          storageBucket: "ogrenci-portali-f4cad.firebasestorage.app",
+          messagingSenderId: "901945087688",
+          appId: "1:901945087688:web:24f1a877f49a15edc577fd",
+          measurementId: "G-JEL3H6H45T"
         };
-        // --------------------------------------------------
+        // -----------------------------------------------------------
 
-        // Firebase Bağlantısını dene (Hata verirse siteyi kilitleme)
-        try { firebase.initializeApp(firebaseConfig); } catch(e){ console.log("Firebase yok"); }
+        // Firebase Başlat
+        try { firebase.initializeApp(firebaseConfig); } catch(e){ alert("Hata: " + e.message); }
         const database = firebase.database();
+        const auth = firebase.auth();
 
         let user = null, kayit = false;
         let board = null, game = new Chess();
         
+        let myColor = 'w', aktifMod = null;
+        let wTime = 600, bTime = 600, chessInterval = null;
+
         if(localStorage.getItem("koyuMod") === "1") document.body.classList.add("koyu-mod");
 
-        // --- MANUEL BULUT GİRİŞ SİSTEMİ (API HATASI VERMEZ) ---
+        // --- GİRİŞ MANTIĞI (HİBRİT: E-POSTA + AD) ---
         function modDegistir() { 
             kayit = !kayit; 
             document.getElementById("authTitle").innerText = kayit ? "Kayıt Ol" : "Giriş Yap";
             document.getElementById("btnIslem").innerText = kayit ? "Kayıt Ol" : "Giriş Yap";
             document.getElementById("toggleText").innerText = kayit ? "Zaten hesabın var mı? Giriş Yap" : "Hesabın yok mu? Kayıt Ol";
+            if(kayit) document.getElementById("emailDiv").classList.remove("gizli");
+            else document.getElementById("emailDiv").classList.add("gizli");
         }
 
         function islemYap() {
-            let k = document.getElementById("kAdi").value.trim().toLowerCase();
-            let s = document.getElementById("sifre").value;
-            if(!k || !s) return alert("Bilgileri girin!");
+            let kAdi = document.getElementById("kAdiInput").value.trim();
+            let pass = document.getElementById("sifreInput").value;
+            
+            if(!kAdi || !pass) return alert("Bilgileri doldurun!");
 
-            // Veritabanına bağlanmayı dene
-            try {
-                if(kayit) {
-                    // KAYIT OL (Veritabanına Yaz)
-                    database.ref('kimlik/' + k).once('value', snapshot => {
-                        if(snapshot.exists()) {
-                            alert("Bu kullanıcı adı alınmış!");
-                        } else {
-                            database.ref('kimlik/' + k).set({sifre: s}).then(() => {
-                                alert("Kayıt Başarılı! Giriş yapılıyor...");
-                                user = k;
-                                girisBasarili();
-                            });
-                        }
-                    });
-                } else {
-                    // GİRİŞ YAP (Veritabanından Oku)
-                    database.ref('kimlik/' + k).once('value', snapshot => {
-                        if(snapshot.exists() && snapshot.val().sifre === s) {
-                            user = k;
-                            girisBasarili();
-                        } else {
-                            alert("Kullanıcı adı veya şifre hatalı!");
-                        }
-                    });
-                }
-            } catch(e) {
-                alert("Veritabanına bağlanılamadı. API Anahtarlarını kontrol et!");
+            if(kayit) {
+                // KAYIT (Ad, Mail, Şifre)
+                let email = document.getElementById("emailInput").value.trim();
+                if(!email) return alert("E-Posta gerekli!");
+
+                database.ref('users').orderByChild('username').equalTo(kAdi).once('value', s => {
+                    if(s.exists()) return alert("Bu kullanıcı adı alınmış!");
+                    
+                    auth.createUserWithEmailAndPassword(email, pass).then(cred => {
+                        database.ref('users/' + cred.user.uid).set({ username: kAdi, email: email });
+                        alert("Kayıt Başarılı! Giriş yapılıyor...");
+                    }).catch(e => alert("Hata: " + e.message));
+                });
+
+            } else {
+                // GİRİŞ (Sadece Ad, Şifre)
+                database.ref('users').orderByChild('username').equalTo(kAdi).once('value', s => {
+                    if(s.exists()) {
+                        let data = Object.values(s.val())[0];
+                        auth.signInWithEmailAndPassword(data.email, pass).catch(e => alert("Şifre yanlış!"));
+                    } else {
+                        alert("Kullanıcı bulunamadı!");
+                    }
+                });
             }
         }
 
-        function girisBasarili() {
+        // Otomatik Giriş
+        auth.onAuthStateChanged(u => {
+            if (u) {
+                database.ref('users/' + u.uid).once('value').then(s => {
+                    user = s.exists() ? s.val().username : u.email.split('@')[0];
+                    girisSonrasiIslemler();
+                });
+            } else {
+                document.getElementById("authScreen").classList.remove("gizli");
+                document.getElementById("appScreen").classList.add("gizli");
+            }
+        });
+
+        function girisSonrasiIslemler() {
             document.getElementById("authScreen").classList.add("gizli");
             document.getElementById("appScreen").classList.remove("gizli");
             document.getElementById("karsilama").innerText = "👤 " + user;
@@ -271,60 +300,61 @@
             baslatSohbet();
         }
 
+        function cikisYap() { auth.signOut().then(()=>location.reload()); }
+        
+        function sifreSifirla() {
+            let m = prompt("E-Posta adresinizi girin:");
+            if(m) auth.sendPasswordResetEmail(m).then(()=>alert("Mail gönderildi!")).catch(e=>alert(e.message));
+        }
+
         // --- VERİ YÖNETİMİ ---
         function getRef(path) { return database.ref(path + '/' + user); } 
 
         function yukleVeriler() {
-            // Puan
-            getRef('puan').on('value', s => document.getElementById("dashPuan").innerText = s.val() || 0);
-            
-            // Günlük
             getRef('gunluk').on('child_added', s => {
                 let d = s.val(); let key = s.key;
                 let html = `
                 <div class="item-card" style="display:block;">
                     <div style="display:flex; justify-content:space-between;">
-                        <b>📅 ${d.t}</b> <button class="btn btn-yesil" style="padding:2px 10px;" onclick="toggleOku('${key}')">Oku</button>
+                        <b>📅 ${d.date}</b>
+                        <button class="btn btn-yesil" style="padding:2px 10px; font-size:12px;" onclick="toggleOku('${key}')">Oku</button>
                     </div>
-                    <div id="g_${key}" class="gizli" style="margin-top:5px; border-top:1px solid #ccc;">${d.txt}</div>
+                    <div id="g_${key}" class="gizli" style="margin-top:10px; border-top:1px solid #ccc; padding-top:5px;">${d.txt}</div>
                 </div>`;
                 document.getElementById("gunlukList").insertAdjacentHTML('afterbegin', html);
             });
-
-            // Notlar
+            
             getRef('notlar').on('child_added', s => {
                 let d = s.val();
                 let renk = d.sonuc >= 50 ? 'basarili' : 'basarisiz';
                 document.getElementById("notListesi").innerHTML += `<div class="item-card ${renk}"><b>${d.ders}</b>: Ort: ${d.sonuc}</div>`;
             });
 
-            // Todo
             getRef('todo').on('child_added', s => {
                 let d = s.val();
-                if(!document.getElementById("td_"+s.key)){
-                    let icon = d.durum==='basarili'?'✅':(d.durum==='basarisiz'?'❌':'⏳');
-                    let stil = d.durum==='basarili'?'basarili':(d.durum==='basarisiz'?'basarisiz':'');
-                    document.getElementById("todoList").innerHTML += `<div id="td_${s.key}" class="item-card ${stil}"><span>${d.txt} (${d.sure}sn)</span> ${icon}</div>`;
+                if(!document.getElementById("gorev_"+s.key)){
+                    let icon = d.durum==='basarili' ? '✅' : (d.durum==='basarisiz' ? '❌' : '⏳');
+                    let stil = d.durum==='basarili' ? 'basarili' : (d.durum==='basarisiz' ? 'basarisiz' : '');
+                    document.getElementById("todoList").innerHTML += `<div id="gorev_${s.key}" class="item-card ${stil}"><span>${d.txt} (${d.sure}sn)</span> ${icon}</div>`;
                 }
             });
-            
             programTabloOlustur();
         }
+        window.toggleOku = function(id) { document.getElementById("g_"+id).classList.toggle("gizli"); }
 
-        window.toggleOku = function(k) { document.getElementById("g_"+k).classList.toggle("gizli"); }
-
-        // --- SATRANÇ (ONLINE) ---
-        let myColor='w', wTime=600, bTime=600, chessInt=null;
+        // --- SATRANÇ ---
         function dereceliGir() {
             document.getElementById("lobiButonlari").classList.add("gizli");
             document.getElementById("beklemeEkrani").classList.remove("gizli");
             database.ref('lobby').once('value', s => {
                 let lob = s.val();
-                if(!lob || lob.status==='empty') {
-                    database.ref('lobby').set({status:'waiting', p1:user}); myColor='w';
-                    database.ref('lobby').on('child_changed', snap => { if(snap.val()==='ready') baslatGeriSayim(); });
-                } else if(lob.status==='waiting') {
-                    database.ref('lobby').update({status:'ready', p2:user}); myColor='b';
+                if(!lob || lob.status === 'empty') {
+                    database.ref('lobby').set({status: 'waiting', p1: user});
+                    myColor = 'w';
+                    database.ref('lobby').on('child_changed', snap => { if(snap.val() === 'ready') baslatGeriSayim(); });
+                } else if (lob.status === 'waiting') {
+                    database.ref('lobby').update({status: 'ready', p2: user});
+                    myColor = 'b';
                     baslatGeriSayim();
                 } else { alert("Dolu"); beklemeyiIptalEt(); }
             });
@@ -332,86 +362,125 @@
         function baslatGeriSayim() {
             document.getElementById("beklemeIcerik").classList.add("gizli");
             document.getElementById("geriSayimIcerik").classList.remove("gizli");
-            let c=5, i=setInterval(()=>{ c--; document.getElementById("geriSayimText").innerText=c; if(c<=0){clearInterval(i); oyunBaslat('online');} },1000);
+            let c = 5, i = setInterval(() => {
+                c--; document.getElementById("geriSayimText").innerText = c;
+                if(c<=0) { clearInterval(i); oyunBaslat('online'); }
+            }, 1000);
         }
-        function oyunModuSec(t){ if(t==='bot') oyunBaslat('bot'); }
-        function beklemeyiIptalEt(){ database.ref('lobby').set({status:'empty'}); document.getElementById("beklemeEkrani").classList.add("gizli"); document.getElementById("lobiButonlari").classList.remove("gizli"); }
-        
+        function oyunModuSec(t) { if(t==='bot') oyunBaslat('bot'); }
+        function beklemeyiIptalEt() { 
+            database.ref('lobby').set({status:'empty'}); 
+            document.getElementById("beklemeEkrani").classList.add("gizli");
+            document.getElementById("lobiButonlari").classList.remove("gizli");
+        }
         function oyunBaslat(mod) {
+            aktifMod = mod;
             document.getElementById("beklemeEkrani").classList.add("gizli");
             document.getElementById("oyunAlani").classList.remove("gizli");
             document.getElementById("lobiButonlari").classList.add("gizli");
-            game.reset();
+            game.reset(); wTime = 600; bTime = 600; baslatSatrancSayaci();
             
-            if(mod==='online') {
-                database.ref('game').on('value', s=>{
-                    let v=s.val(); if(v && v.fen!==game.fen()) { game.load(v.fen); board.position(v.fen); }
+            if(mod === 'online') {
+                database.ref('game').on('value', s => {
+                    let v = s.val();
+                    if(v && v.fen !== game.fen()) {
+                        game.load(v.fen); board.position(v.fen); kontrolEtBittiMi();
+                    }
                 });
             }
-            
+            if(board) board.destroy();
             board = Chessboard('myBoard', {
-                draggable:true, position:'start',
-                orientation: myColor==='b'&&mod==='online' ? 'black' : 'white',
-                onDragStart: (s,p) => { if(game.game_over() || (mod==='online'&&game.turn()!==myColor)) return false; },
-                onDrop: (s,t) => {
-                    let m=game.move({from:s, to:t, promotion:'q'});
-                    if(m===null) return 'snapback';
-                    if(mod==='online') database.ref('game').set({fen:game.fen(), turn:game.turn()});
-                    if(mod==='bot') setTimeout(()=>{ game.move(game.moves()[Math.floor(Math.random()*game.moves().length)]); board.position(game.fen()); },250);
+                draggable: true, position: 'start',
+                orientation: myColor === 'b' && mod === 'online' ? 'black' : 'white',
+                onDragStart: (s, p) => {
+                    if(game.game_over()) return false;
+                    if(mod === 'online' && game.turn() !== myColor) return false;
+                    if(mod === 'bot' && game.turn() === 'b') return false;
+                },
+                onDrop: (s, t) => {
+                    let m = game.move({from: s, to: t, promotion: 'q'});
+                    if(m === null) return 'snapback';
+                    if(mod === 'online') database.ref('game').set({fen: game.fen(), turn: game.turn()});
+                    if(mod === 'bot') setTimeout(botHamlesi, 250);
+                    kontrolEtBittiMi();
                 }
             });
         }
-        function pesEt(){ alert("Bitti"); location.reload(); }
-
-        // --- ZAMANLI GÖREV ---
-        function gorevEkle() {
-            let t=document.getElementById("todoIn").value, s=parseInt(document.getElementById("todoTime").value);
-            if(!t||!s) return;
-            let ref = getRef('todo').push();
-            ref.set({txt:t, sure:s, durum:'bekliyor'});
-            document.getElementById("todoIn").value="";
-            
-            let div=document.createElement("div"); div.id="tmp_"+ref.key; div.className="item-card"; div.style.borderLeftColor="#f1c40f";
-            div.innerHTML=`<span>${t}</span> <b id="c_${ref.key}">${s}</b> <button class="btn btn-yesil" onclick="gorevSonuc('${ref.key}','basarili')">Bitir</button>`;
-            document.getElementById("todoList").prepend(div);
-            
-            let int=setInterval(()=>{
-                s--; let el=document.getElementById("c_"+ref.key); if(el) el.innerText=s;
-                if(s<=0){ clearInterval(int); gorevSonuc(ref.key, 'basarisiz'); }
-            },1000);
+        function baslatSatrancSayaci() {
+            clearInterval(chessInterval);
+            chessInterval = setInterval(() => {
+                if(game.game_over()) { clearInterval(chessInterval); return; }
+                if(game.turn() === 'w') { wTime--; document.getElementById("timerW").classList.add("timer-active"); document.getElementById("timerB").classList.remove("timer-active"); } 
+                else { bTime--; document.getElementById("timerB").classList.add("timer-active"); document.getElementById("timerW").classList.remove("timer-active"); }
+                
+                let mw = Math.floor(wTime/60), sw = wTime%60;
+                let mb = Math.floor(bTime/60), sb = bTime%60;
+                document.getElementById("timerW").innerText = `Beyaz: ${mw}:${sw<10?'0':''}${sw}`;
+                document.getElementById("timerB").innerText = `Siyah: ${mb}:${sb<10?'0':''}${sb}`;
+                
+                if(wTime<=0 || bTime<=0) { clearInterval(chessInterval); alert("Süre bitti!"); }
+            }, 1000);
         }
-        window.gorevSonuc = function(k,d) {
-            let el=document.getElementById("tmp_"+k); if(el) el.remove();
-            getRef('todo/'+k).update({durum:d});
+        function botHamlesi() {
+            let moves = game.moves();
+            game.move(moves[Math.floor(Math.random() * moves.length)]);
+            board.position(game.fen()); kontrolEtBittiMi();
         }
+        function kontrolEtBittiMi() {
+            if(game.game_over()) { clearInterval(chessInterval); alert("Oyun Bitti!"); if(aktifMod === 'online') database.ref('lobby').set({status:'empty'}); }
+        }
+        function pesEt() { alert("Pes ettin!"); if(aktifMod === 'online') database.ref('lobby').set({status:'empty'}); location.reload(); }
 
-        // --- DİĞERLERİ ---
-        function gunlukEkle(){ let t=document.getElementById("gunlukIn").value; if(t){ getRef('gunluk').push({txt:t, t:new Date().toLocaleDateString()}); document.getElementById("gunlukIn").value=""; } }
-        function notHesapla(){ let d=document.getElementById("dersAdi").value, v=Number(document.getElementById("vizeNot").value), f=Number(document.getElementById("finalNot").value); if(d){ getRef('notlar').push({ders:d, sonuc:((v*0.4)+(f*0.6)).toFixed(1)}); } }
-        
-        function baslatSohbet(){ database.ref('chat').on('child_added',s=>{ let m=s.val(); let st=m.u===user?"background:#6c5ce7;color:white;margin-left:auto;":"background:#eee;color:black;"; document.getElementById("chatArea").innerHTML+=`<div style="padding:8px;margin:5px;border-radius:10px;width:fit-content;${st}"><b>${m.u}:</b> ${m.t}</div>`; }); }
-        function chatYolla(){ let t=document.getElementById("chatIn").value; if(t){ database.ref('chat').push({u:user, t:t}); document.getElementById("chatIn").value=""; } }
+        // --- POMODORO ---
+        let pInt, pSur=25*60, pDur=false;
+        function dersBaslat(dk){ clearInterval(pInt); pSur=dk*60; pDur=true; document.getElementById("pomoDurBtn").innerText="Durdur"; sayac(); }
+        function sayac(){ clearInterval(pInt); pInt=setInterval(()=>{ pSur--; let m=Math.floor(pSur/60),s=pSur%60; document.getElementById("pomoSure").innerText=`${m}:${s<10?'0':''}${s}`; if(pSur<=0){clearInterval(pInt);alert("Süre!");} },1000); }
+        function pomoDuraklat(){ if(pDur){clearInterval(pInt);pDur=false;document.getElementById("pomoDurBtn").innerText="Devam Et";}else{pDur=true;document.getElementById("pomoDurBtn").innerText="Durdur";sayac();} }
 
+        // --- DİĞER FONKSİYONLAR ---
+        function gunlukEkle() { let t = document.getElementById("gunlukIn").value; if(t) { getRef('gunluk').push({txt:t, date: new Date().toLocaleDateString()}); document.getElementById("gunlukIn").value=""; } }
+        function notHesapla() { let d=document.getElementById("dersAdi").value, v=Number(document.getElementById("vizeNot").value), f=Number(document.getElementById("finalNot").value); if(d) getRef('notlar').push({ders:d, sonuc:((v*0.4)+(f*0.6)).toFixed(1)}); }
         function programTabloOlustur(){
             let t=document.querySelector("#programTablosu tbody"); t.innerHTML="";
-            getRef('program').once('value', s=>{
-                let d=s.val()||{};
-                ["09:00","10:00","11:00","13:00","14:00"].forEach((saat,i)=>{
+            let s=["09:00","10:00","11:00","13:00","14:00"];
+            getRef('program').once('value', sn=>{
+                let data=sn.val()||{};
+                s.forEach((saat,i)=>{
                     let tr=document.createElement("tr"); tr.innerHTML=`<td><b>${saat}</b></td>`;
-                    for(let j=0;j<5;j++) tr.innerHTML+=`<td><input class="ders-input" id="d_${i}_${j}" value="${d['d_'+i+'_'+j]||''}"></td>`;
+                    for(let j=0;j<5;j++) tr.innerHTML+=`<td><input class="ders-input" id="d_${i}_${j}" value="${data['d_'+i+'_'+j]||''}"></td>`;
                     t.appendChild(tr);
                 });
             });
         }
         function programKaydet(){ let v={}; document.querySelectorAll(".ders-input").forEach(i=>v[i.id]=i.value); getRef('program').set(v).then(()=>alert("Kaydedildi")); }
         
-        // --- POMODORO ---
-        let pInt, pSur=25*60, pDur=false;
-        function dersBaslat(dk){ clearInterval(pInt); pSur=dk*60; pDur=true; document.getElementById("pomoDurBtn").innerText="Durdur"; sayac(); }
-        function sayac(){ clearInterval(pInt); pInt=setInterval(()=>{ pSur--; let m=Math.floor(pSur/60),s=pSur%60; document.getElementById("pomoSure").innerText=`${m}:${s<10?'0':''}${s}`; if(pSur<=0){clearInterval(pInt);alert("Süre!");} },1000); }
-        function pomoDuraklat(){ if(pDur){clearInterval(pInt);pDur=false;document.getElementById("pomoDurBtn").innerText="Devam Et";}else{pDur=true;document.getElementById("pomoDurBtn").innerText="Durdur";sayac();} }
+        function gorevEkle() {
+            let t = document.getElementById("todoIn").value, s = parseInt(document.getElementById("todoTime").value);
+            if(!t || !s) return;
+            let ref = getRef('todo').push();
+            ref.set({txt:t, sure:s, durum:'bekliyor'});
+            document.getElementById("todoIn").value=""; document.getElementById("todoTime").value="";
+            baslatGorevSayaci(ref.key, t, s);
+        }
+        function baslatGorevSayaci(key, txt, sure) {
+            let div = document.createElement("div"); div.id = "temp_" + key; div.className = "item-card"; div.style.borderLeftColor = "#f1c40f";
+            div.innerHTML = `<span>${txt}</span> <b id="cnt_${key}">${sure}</b> <button class="btn btn-yesil" onclick="gorevSonuc('${key}', 'basarili')">Bitir</button>`;
+            document.getElementById("todoList").prepend(div);
+            let int = setInterval(() => {
+                sure--; let el = document.getElementById("cnt_"+key); if(el) el.innerText = sure;
+                if(sure <= 0) { clearInterval(int); gorevSonuc(key, 'basarisiz'); }
+                if(!document.getElementById("temp_"+key)) clearInterval(int);
+            }, 1000);
+        }
+        window.gorevSonuc = function(key, durum) {
+            let div = document.getElementById("temp_"+key); if(div) div.remove();
+            getRef('todo/'+key).update({durum: durum});
+        }
+
+        function baslatSohbet(){ database.ref('chat').on('child_added',s=>{ let m=s.val(); let st=m.u===user?"background:#6c5ce7;color:white;margin-left:auto;":"background:#eee;color:black;"; document.getElementById("chatArea").innerHTML+=`<div style="padding:8px;margin:5px;border-radius:10px;width:fit-content;${st}"><b>${m.u}:</b> ${m.t}</div>`; }); }
+        function chatYolla(){ let t=document.getElementById("chatIn").value; if(t){ database.ref('chat').push({u:user, t:t}); document.getElementById("chatIn").value=""; } }
         function sayfaGec(id){ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active")); document.getElementById(id).classList.add("active"); }
-        function koyuModToggle(){ document.body.classList.toggle("koyu-mod"); }
+        function koyuModToggle(){ document.body.classList.toggle("koyu-mod"); localStorage.setItem("koyuMod", document.body.classList.contains("koyu-mod") ? "1" : "0"); }
     </script>
 </body>
 </html>
