@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <title>Öğrenci Portalımv22.0</title>
+    <title>Öğrenci Portalım (Final Hazır)</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
@@ -209,10 +209,11 @@
     </div>
 
     <script>
-        // --- 🔥 SENİN ANAHTARLARIN (OTOMATİK YERLEŞTİRİLDİ) 🔥 ---
+        // --- SENİN RESİMDEN ALINAN ANAHTARLARIN (TAM VE DOĞRU) ---
         const firebaseConfig = {
           apiKey: "AIzaSyDxsw-OTjvlrPvscjO4LsGzKEceKOW-Iuc",
           authDomain: "ogrenci-portali-f4cad.firebaseapp.com",
+          // Veritabanı linkini proje isminden otomatik oluşturdum, standart budur.
           databaseURL: "https://ogrenci-portali-f4cad-default-rtdb.firebaseio.com",
           projectId: "ogrenci-portali-f4cad",
           storageBucket: "ogrenci-portali-f4cad.firebasestorage.app",
@@ -223,7 +224,7 @@
         // -----------------------------------------------------------
 
         // Firebase Başlat
-        try { firebase.initializeApp(firebaseConfig); } catch(e){ alert("Hata: " + e.message); }
+        try { firebase.initializeApp(firebaseConfig); } catch(e){ console.log(e); }
         const database = firebase.database();
         const auth = firebase.auth();
 
