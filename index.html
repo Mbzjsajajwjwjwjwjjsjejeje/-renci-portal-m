@@ -3,14 +3,16 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta charset="UTF-8">
-    <title>Öğrenci Portalım V42</title>
+    <title>Öğrenci Portalım V58 - Gigant</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    
     <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.2/chess.js"></script>
 
@@ -19,8 +21,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+        /* ================================================
+           2. CSS TASARIMI (FULL EXPANDED FORMAT)
+           Her özellik ayrı satırda yazılarak sıkışma engellendi.
+           ================================================
+        */
+
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
         
+        /* Değişkenler */
         :root { 
             --bg-body: #f3f4f6;       
             --bg-panel: #ffffff;      
@@ -30,8 +39,21 @@
             --border: #e5e7eb;        
             --shadow: 0 10px 25px rgba(0,0,0,0.08);
             --input-bg: #ffffff;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f1c40f;
+            
+            /* Kanban Durum Renkleri */
+            --fail-bg: #ffebee;
+            --fail-border: #ef9a9a;
+            --fail-text: #c62828;
+            
+            --success-bg: #e8f5e9;
+            --success-border: #a5d6a7;
+            --success-text: #2e7d32;
         }
         
+        /* Koyu Mod */
         body.dark-mode { 
             --bg-body: #111827;       
             --bg-panel: #1f2937;      
@@ -41,136 +63,936 @@
             --border: #374151;        
             --shadow: 0 10px 25px rgba(0,0,0,0.3);
             --input-bg: #374151;
+            
+            --fail-bg: #4a1c1c;
+            --fail-border: #ef5350;
+            --fail-text: #ffcdd2;
+            
+            --success-bg: #1b4d3e;
+            --success-border: #66bb6a;
+            --success-text: #c8e6c9;
         }
         
-        body { font-family: 'Poppins', sans-serif; background: var(--bg-body); margin: 0; min-height: 100vh; display: flex; justify-content: center; align-items: center; color: var(--text-main); overflow: hidden; transition: background 0.3s, color 0.3s; }
+        /* Sayfa Genel */
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background-color: var(--bg-body); 
+            margin-top: 0;
+            margin-bottom: 0;
+            margin-left: 0;
+            margin-right: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            padding-left: 0;
+            padding-right: 0;
+            min-height: 100vh; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            color: var(--text-main); 
+            overflow: hidden; 
+            transition-property: background-color, color;
+            transition-duration: 0.3s;
+        }
         
+        /* Ana Kutu */
         .container { 
-            background: var(--bg-panel); 
-            width: 95%; max-width: 1400px; 
+            background-color: var(--bg-panel); 
+            width: 95%; 
+            max-width: 1400px; 
             height: 90vh; 
-            border-radius: 20px; 
+            border-top-left-radius: 20px; 
+            border-top-right-radius: 20px;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
             box-shadow: var(--shadow); 
             display: flex; 
             overflow: hidden; 
             position: relative; 
-            border: 1px solid var(--border); 
-            transition: background 0.3s; 
+            border-width: 1px;
+            border-style: solid;
+            border-color: var(--border);
+            transition-property: background-color;
+            transition-duration: 0.3s; 
         }
 
         /* --- MOBİL UYUM --- */
         @media screen and (max-width: 768px) {
-            body { display: block; height: auto; overflow-y: auto; padding-bottom: 80px; }
-            .container { flex-direction: column !important; width: 100% !important; height: auto !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; background: transparent !important; }
-            .sidebar { 
-                position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--bg-panel) !important; 
-                display: flex; flex-direction: row !important; justify-content: space-around; align-items: center;
-                padding: 5px 0 !important; border-top: 1px solid var(--border); border-right: none !important; z-index: 9999;
-                box-shadow: 0 -5px 20px rgba(0,0,0,0.1); overflow: hidden !important;
+            body { 
+                display: block; 
+                height: auto; 
+                overflow-y: auto; 
+                padding-bottom: 80px; 
             }
-            .sidebar h3, .sidebar p, .sidebar button, .theme-btn span, .user-profile-mini { display: none !important; }
-            .theme-btn { margin: 0; padding: 10px; width: 40px; justify-content: center; border: none; background: transparent; }
-            .menu-item { flex-direction: column; font-size: 10px; padding: 5px !important; margin: 0 !important; border-radius: 50%; width: 50px; height: 50px; justify-content: center; background: transparent !important; box-shadow: none !important; }
-            .menu-item i { font-size: 20px; margin-bottom: 2px; }
-            .menu-item.active { color: var(--primary) !important; background: rgba(108, 92, 231, 0.1) !important; }
-            .menu-item.active i { color: var(--primary) !important; transform: none !important; }
-            .content { padding: 15px !important; background: transparent !important; height: auto !important; overflow: visible !important; }
-            #myBoard { width: 100% !important; max-width: 350px !important; margin: 0 auto; }
-            .auth-box { width: 85% !important; padding: 30px 20px !important; margin-top: 50px; }
-            .overlay { align-items: flex-start; overflow-y: auto; padding-bottom: 50px; }
-            
-            /* Mobil Player Konumu */
-            .music-player { bottom: 85px !important; right: 15px !important; }
+            .container { 
+                flex-direction: column !important; 
+                width: 100% !important; 
+                height: auto !important; 
+                border-radius: 0 !important; 
+                border: none !important; 
+                box-shadow: none !important; 
+                background: transparent !important; 
+            }
+            .sidebar { 
+                position: fixed; 
+                bottom: 0; 
+                left: 0; 
+                width: 100%; 
+                height: 70px; 
+                background-color: var(--bg-panel) !important; 
+                display: flex; 
+                flex-direction: row !important; 
+                justify-content: space-around; 
+                align-items: center;
+                padding-top: 5px;
+                padding-bottom: 5px; 
+                border-top-width: 1px;
+                border-top-style: solid;
+                border-top-color: var(--border);
+                border-right: none !important; 
+                z-index: 9999;
+                box-shadow: 0 -5px 20px rgba(0,0,0,0.1); 
+                overflow: hidden !important; 
+            }
+            .sidebar h3, .sidebar p, .sidebar button, .theme-btn span, .user-profile-mini, .streak-badge, .xp-container { 
+                display: none !important; 
+            }
+            .theme-btn { 
+                margin-top: 0;
+                margin-bottom: 0; 
+                padding: 10px; 
+                width: 40px; 
+                justify-content: center; 
+                border: none; 
+                background: transparent; 
+            }
+            .menu-item { 
+                flex-direction: column; 
+                font-size: 10px; 
+                padding: 5px !important; 
+                margin: 0 !important; 
+                border-radius: 50%; 
+                width: 50px; 
+                height: 50px; 
+                justify-content: center; 
+                background: transparent !important; 
+                box-shadow: none !important; 
+            }
+            .content { 
+                padding: 15px !important; 
+                background: transparent !important; 
+                height: auto !important; 
+                overflow: visible !important; 
+            }
+            #myBoard { 
+                width: 100% !important; 
+                max-width: 350px !important; 
+                margin-top: 0;
+                margin-bottom: 0;
+                margin-left: auto;
+                margin-right: auto; 
+            }
+            .kanban-board { 
+                flex-direction: column; 
+            }
+            .chart-card, .leaderboard-card { 
+                grid-column: span 1 !important; 
+            }
+            .auth-box { 
+                width: 85% !important; 
+                padding: 30px 20px !important; 
+                margin-top: 50px; 
+            }
+            .overlay { 
+                align-items: flex-start; 
+                overflow-y: auto; 
+                padding-bottom: 50px; 
+            }
+            .music-player { 
+                bottom: 85px !important; 
+                right: 15px !important; 
+                width: 300px !important; 
+            }
         }
 
-        .sidebar { width: 270px; background: var(--bg-panel); padding: 20px; display: flex; flex-direction: column; gap: 5px; border-right: 1px solid var(--border); z-index: 2; transition: background 0.3s; flex-shrink: 0; overflow-y: auto; }
-        .sidebar::-webkit-scrollbar { width: 5px; } .sidebar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 5px; }
+        /* --- YAN MENÜ --- */
+        .sidebar { 
+            width: 270px; 
+            background-color: var(--bg-panel); 
+            padding-top: 20px;
+            padding-bottom: 20px;
+            padding-left: 20px;
+            padding-right: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 5px; 
+            border-right-width: 1px;
+            border-right-style: solid;
+            border-right-color: var(--border); 
+            z-index: 2; 
+            transition: background 0.3s; 
+            flex-shrink: 0; 
+            overflow-y: auto; 
+        }
+        .sidebar::-webkit-scrollbar { 
+            width: 5px; 
+        } 
+        .sidebar::-webkit-scrollbar-thumb { 
+            background-color: #ccc; 
+            border-radius: 5px; 
+        }
         
-        .content { flex: 1; padding: 40px; overflow-y: auto; scroll-behavior: smooth; background: var(--bg-body); }
-        .menu-item { padding: 12px 15px; cursor: pointer; border-radius: 12px; display: flex; gap: 12px; align-items: center; color: var(--text-sec); transition: all 0.2s ease; font-weight: 600; font-size: 14px; }
-        .menu-item:hover { background: rgba(108, 92, 231, 0.1); color: var(--primary); transform: translateX(5px); }
-        .menu-item.active { background: var(--primary); color: white; box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3); transform: translateX(5px); }
-        .theme-btn { margin-bottom: 15px; padding: 10px; border-radius: 10px; background: var(--bg-body); border: 1px solid var(--border); color: var(--text-main); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; font-size: 13px; }
+        .content { 
+            flex: 1; 
+            padding-top: 40px;
+            padding-bottom: 40px;
+            padding-left: 40px;
+            padding-right: 40px; 
+            overflow-y: auto; 
+            scroll-behavior: smooth; 
+            background-color: var(--bg-body); 
+        }
+        
+        .menu-item { 
+            padding-top: 12px;
+            padding-bottom: 12px;
+            padding-left: 15px;
+            padding-right: 15px; 
+            cursor: pointer; 
+            border-radius: 12px; 
+            display: flex; 
+            gap: 12px; 
+            align-items: center; 
+            color: var(--text-sec); 
+            transition: all 0.2s ease; 
+            font-weight: 600; 
+            font-size: 14px; 
+        }
+        .menu-item:hover { 
+            background-color: rgba(108, 92, 231, 0.1); 
+            color: var(--primary); 
+            transform: translateX(5px); 
+        }
+        .menu-item.active { 
+            background-color: var(--primary); 
+            color: white; 
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.3); 
+            transform: translateX(5px); 
+        }
+        
+        .theme-btn { 
+            margin-bottom: 15px; 
+            padding: 10px; 
+            border-radius: 10px; 
+            background-color: var(--bg-body); 
+            border-width: 1px;
+            border-style: solid;
+            border-color: var(--border); 
+            color: var(--text-main); 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            font-weight: 600; 
+            font-size: 13px; 
+        }
 
-        .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index:999; display:flex; justify-content:center; align-items:center; }
-        .auth-box { padding: 50px; width: 400px; text-align: center; background: var(--bg-panel); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border: 1px solid var(--border); }
-        .input-group input { width: 100%; padding: 16px; margin-bottom: 12px; border: 2px solid var(--border); border-radius: 12px; background: var(--input-bg); color: var(--text-main); outline: none; transition: 0.3s; box-sizing: border-box; }
-        .auth-btn { width: 100%; padding: 16px; border: none; border-radius: 12px; background: var(--primary); color: white; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 15px; }
-        .link-text { color: var(--primary); font-weight: 700; cursor: pointer; font-size: 14px; margin-top: 25px; display: block; }
+        /* --- GİRİŞ EKRANI --- */
+        .overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.8); 
+            backdrop-filter: blur(5px); 
+            z-index: 999; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        .auth-box { 
+            padding: 50px; 
+            width: 400px; 
+            text-align: center; 
+            background-color: var(--bg-panel); 
+            border-radius: 24px; 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
+            border: 1px solid var(--border); 
+        }
+        .input-group input { 
+            width: 100%; 
+            padding: 16px; 
+            margin-bottom: 12px; 
+            border-width: 2px;
+            border-style: solid;
+            border-color: var(--border); 
+            border-radius: 12px; 
+            background-color: var(--input-bg); 
+            color: var(--text-main); 
+            outline: none; 
+            transition: 0.3s; 
+            box-sizing: border-box; 
+        }
+        .auth-btn { 
+            width: 100%; 
+            padding: 16px; 
+            border: none; 
+            border-radius: 12px; 
+            background-color: var(--primary); 
+            color: white; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            margin-top: 15px; 
+        }
+        .link-text { 
+            color: var(--primary); 
+            font-weight: 700; 
+            cursor: pointer; 
+            font-size: 14px; 
+            margin-top: 25px; 
+            display: block; 
+        }
         
-        .page { display: none; animation: fadeIn 0.4s ease-out; } .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .gizli { display: none !important; }
+        /* --- SAYFA YAPISI --- */
+        .page { 
+            display: none; 
+            animation: fadeIn 0.4s ease-out; 
+        } 
+        .page.active { 
+            display: block; 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .gizli { 
+            display: none !important; 
+        }
         
-        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
-        .stat-card { background: var(--bg-panel); padding: 30px; border-radius: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); text-align: center; position: relative; overflow: hidden; }
-        .btn { padding: 14px 28px; border: none; border-radius: 12px; cursor: pointer; color: white; font-weight: 600; transition: 0.3s; font-size: 15px; display: inline-flex; align-items: center; gap: 10px; justify-content: center; }
-        .btn-yesil { background: #10b981; } .btn-kirmizi { background: #ef4444; } .btn-gri { background: #6b7280; }
-        input, textarea, select { width: 100%; padding: 14px; margin: 8px 0; border: 2px solid var(--border); border-radius: 12px; box-sizing: border-box; font-family: 'Poppins', sans-serif; color: var(--text-main); background: var(--input-bg); }
-        table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--bg-panel); border-radius: 16px; overflow: hidden; border: 1px solid var(--border); }
-        th { background: var(--primary); color: white; padding: 18px; text-align: left; }
-        td { padding: 15px; border-bottom: 1px solid var(--border); color: var(--text-main); font-weight: 500; }
-        .ders-input { border: none; background: transparent; width: 100%; font-weight: 600; color: var(--text-main); }
-        .item-card { background: var(--bg-panel); padding: 20px; margin-bottom: 15px; border-radius: 15px; border-left: 6px solid #ccc; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); color: var(--text-main); border: 1px solid var(--border); }
-        .calc-group { background: var(--bg-panel); padding: 25px; border-radius: 20px; margin-bottom: 25px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-        .calc-title { font-size: 18px; font-weight: 700; color: var(--primary); margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--border); }
+        /* --- XP SİSTEMİ --- */
+        .xp-container { 
+            padding: 15px; 
+            background-color: var(--bg-body); 
+            border-radius: 15px; 
+            margin-bottom: 15px; 
+            text-align: center; 
+            border-width: 1px;
+            border-style: solid;
+            border-color: var(--border); 
+        }
+        .level-badge { 
+            background-color: var(--primary); 
+            color: white; 
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 15px;
+            padding-right: 15px; 
+            border-radius: 20px; 
+            font-weight: 800; 
+            font-size: 12px; 
+            display: inline-block; 
+            margin-bottom: 10px; 
+        }
+        .xp-bar-bg { 
+            width: 100%; 
+            height: 8px; 
+            background-color: #ddd; 
+            border-radius: 4px; 
+            overflow: hidden; 
+            margin-top: 5px; 
+        }
+        .xp-bar-fill { 
+            height: 100%; 
+            background: linear-gradient(90deg, #f1c40f, #e67e22); 
+            width: 0%; 
+            transition: width 0.5s ease; 
+        }
+        .streak-badge { 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            background: linear-gradient(135deg, #ff9f43, #ee5253); 
+            color: white; 
+            padding-top: 5px;
+            padding-bottom: 5px;
+            padding-left: 12px;
+            padding-right: 12px; 
+            border-radius: 20px; 
+            font-size: 12px; 
+            font-weight: 700; 
+            margin-top: 5px; 
+        }
+
+        /* --- KANBAN PANOSU (GÜNCELLENDİ) --- */
+        .kanban-board { 
+            display: flex; 
+            gap: 20px; 
+            height: 100%; 
+            overflow-x: auto; 
+            padding-bottom: 20px; 
+        }
+        .kanban-column { 
+            flex: 1; 
+            min-width: 300px; 
+            background-color: var(--bg-panel); 
+            border-radius: 15px; 
+            padding: 15px; 
+            border: 1px solid var(--border); 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .kanban-header { 
+            font-weight: 700; 
+            color: var(--text-main); 
+            margin-bottom: 15px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-bottom: 2px solid var(--border); 
+            padding-bottom: 10px; 
+        }
+        .kanban-items { 
+            flex: 1; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+        }
+        .kanban-card { 
+            background-color: var(--bg-body); 
+            padding: 15px; 
+            border-radius: 10px; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+            transition: 0.2s; 
+            position: relative; /* Sil butonu için */
+        }
+        
+        /* BAŞARILI / BAŞARISIZ DURUMLARI */
+        .kanban-card.failed {
+            background-color: var(--fail-bg);
+            border-color: var(--fail-border);
+            border-width: 2px;
+        }
+        .kanban-card.failed strong {
+            color: var(--fail-text);
+        }
+        
+        .kanban-card.success {
+            background-color: var(--success-bg);
+            border-color: var(--success-border);
+            border-width: 2px;
+        }
+        .kanban-card.success strong {
+            color: var(--success-text);
+        }
+
+        .kanban-card:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+        }
+        .kanban-actions { 
+            margin-top: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            border-top: 1px solid var(--border); 
+            padding-top: 8px;
+        }
+        .k-btn { 
+            background: transparent; 
+            border: 1px solid var(--border); 
+            border-radius: 5px; 
+            cursor: pointer; 
+            color: var(--text-sec); 
+            padding: 5px 10px; 
+            font-size: 14px; 
+            width: 30px; 
+            text-align: center;
+            transition: 0.2s; 
+        }
+        .k-btn:hover { 
+            background-color: var(--primary); 
+            color: white; 
+            border-color: var(--primary); 
+        }
+        
+        /* GÖREV SİLME BUTONU */
+        .btn-delete-task {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: transparent;
+            color: var(--text-sec);
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0.5;
+            transition: 0.2s;
+        }
+        .btn-delete-task:hover {
+            color: var(--danger);
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        /* --- DİĞER BİLEŞENLER --- */
+        .card-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+        }
+        .stat-card { 
+            background-color: var(--bg-panel); 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: var(--shadow); 
+            border: 1px solid var(--border); 
+            text-align: center; 
+            position: relative; 
+            overflow: hidden; 
+        }
+        .btn { 
+            padding: 14px 28px; 
+            border: none; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            color: white; 
+            font-weight: 600; 
+            transition: 0.2s; 
+            font-size: 15px; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 10px; 
+            justify-content: center; 
+        }
+        .btn:active { 
+            transform: scale(0.95); 
+        }
+        .btn-yesil { background-color: var(--success); } 
+        .btn-kirmizi { background-color: var(--danger); } 
+        .btn-gri { background-color: #6b7280; }
+        
+        input, textarea, select { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 8px 0; 
+            border: 2px solid var(--border); 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+            font-family: 'Poppins', sans-serif; 
+            color: var(--text-main); 
+            background-color: var(--input-bg); 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: separate; 
+            border-spacing: 0; 
+            background-color: var(--bg-panel); 
+            border-radius: 16px; 
+            overflow: hidden; 
+            border: 1px solid var(--border); 
+        }
+        th { 
+            background-color: var(--primary); 
+            color: white; 
+            padding: 18px; 
+            text-align: left; 
+        }
+        td { 
+            padding: 15px; 
+            border-bottom: 1px solid var(--border); 
+            color: var(--text-main); 
+            font-weight: 500; 
+        }
+        .ders-input { 
+            border: none; 
+            background: transparent; 
+            width: 100%; 
+            font-weight: 600; 
+            color: var(--text-main); 
+        }
+        .calc-group { 
+            background-color: var(--bg-panel); 
+            padding: 25px; 
+            border-radius: 20px; 
+            margin-bottom: 25px; 
+            border: 1px solid var(--border); 
+            box-shadow: var(--shadow); 
+        }
+        .calc-title { 
+            font-size: 18px; 
+            font-weight: 700; 
+            color: var(--primary); 
+            margin-bottom: 20px; 
+            padding-bottom: 15px; 
+            border-bottom: 2px solid var(--border); 
+        }
         
         /* Satranç & Pomo */
-        .chess-container { display: flex; flex-direction: column; align-items: center; background: var(--bg-panel); padding: 30px; border-radius: 20px; box-shadow: var(--shadow); border: 1px solid var(--border); }
-        #myBoard { width: 420px; border: 8px solid #374151; border-radius: 8px; }
-        .timers { display: flex; justify-content: space-between; width: 100%; max-width: 420px; margin-bottom: 20px; gap: 15px; }
-        .timer-box { background: #2d3436; color: #dfe6e9; padding: 15px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 28px; font-weight: 800; width: 100%; text-align: center; border: 3px solid #636e72; box-shadow: 0 5px 15px rgba(0,0,0,0.2); transition: 0.3s; }
-        .timer-active { background: #fff; color: #2d3436; border-color: #00b894; box-shadow: 0 0 20px rgba(0, 184, 148, 0.6); transform: scale(1.05); }
-        .pomodoro-circle { width: 240px; height: 240px; border-radius: 50%; border: 10px solid var(--border); border-top-color: var(--primary); display: flex; justify-content: center; align-items: center; font-size: 55px; font-weight: 800; margin: 30px auto; color: var(--text-main); }
-        #beklemeEkrani { position: absolute; top:0; left:0; width:100%; height:100%; background: var(--bg-panel); z-index: 99; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { width: 60px; height: 60px; border: 6px solid var(--border); border-top: 6px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* AVATAR & PROFIL */
-        .avatar-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px; }
-        .avatar-option { font-size: 35px; cursor: pointer; padding: 10px; border-radius: 50%; border: 2px solid transparent; transition: 0.3s; }
-        .avatar-option:hover, .avatar-option.selected { background: var(--bg-body); border-color: var(--primary); transform: scale(1.1); }
-        .user-profile-mini { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg-body); border-radius: 12px; margin-bottom: 15px; }
-        .user-avatar-small { font-size: 30px; }
+        .chess-container { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            background-color: var(--bg-panel); 
+            padding: 30px; 
+            border-radius: 20px; 
+            box-shadow: var(--shadow); 
+            border: 1px solid var(--border); 
+        }
+        #myBoard { 
+            width: 420px; 
+            border: 8px solid #374151; 
+            border-radius: 8px; 
+        }
+        .timers { 
+            display: flex; 
+            justify-content: space-between; 
+            width: 100%; 
+            max-width: 420px; 
+            margin-bottom: 20px; 
+            gap: 15px; 
+        }
+        .timer-box { 
+            background-color: #2d3436; 
+            color: #dfe6e9; 
+            padding: 15px; 
+            border-radius: 12px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 28px; 
+            font-weight: 800; 
+            width: 100%; 
+            text-align: center; 
+            border: 3px solid #636e72; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+            transition: 0.3s; 
+        }
+        .timer-active { 
+            background-color: #fff; 
+            color: #2d3436; 
+            border-color: #00b894; 
+            box-shadow: 0 0 20px rgba(0, 184, 148, 0.6); 
+            transform: scale(1.05); 
+        }
+        .pomodoro-circle { 
+            width: 240px; 
+            height: 240px; 
+            border-radius: 50%; 
+            border: 10px solid var(--border); 
+            border-top-color: var(--primary); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 55px; 
+            font-weight: 800; 
+            margin: 30px auto; 
+            color: var(--text-main); 
+        }
+        #beklemeEkrani { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: var(--bg-panel); 
+            z-index: 99; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+        }
+        .spinner { 
+            width: 60px; 
+            height: 60px; 
+            border: 6px solid var(--border); 
+            border-top: 6px solid var(--primary); 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+            margin-bottom: 20px; 
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
         
-        /* TOAST BİLDİRİM */
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { min-width: 280px; padding: 16px 20px; border-radius: 12px; color: white; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.25); display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease-out forwards; font-size: 14px; }
+        /* BİLGİ KARTLARI (FLASHCARDS) */
+        .flashcard-container { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; 
+            margin-top: 20px; 
+        }
+        .flashcard { 
+            background-color: transparent; 
+            width: 100%; 
+            height: 220px; 
+            perspective: 1000px; 
+            cursor: pointer; 
+        }
+        .flashcard-inner { 
+            position: relative; 
+            width: 100%; 
+            height: 100%; 
+            text-align: center; 
+            transition: transform 0.6s; 
+            transform-style: preserve-3d; 
+            box-shadow: var(--shadow); 
+            border-radius: 15px; 
+        }
+        .flashcard.flipped .flashcard-inner { 
+            transform: rotateY(180deg); 
+        }
+        .flashcard-front, .flashcard-back { 
+            position: absolute; 
+            width: 100%; 
+            height: 100%; 
+            -webkit-backface-visibility: hidden; 
+            backface-visibility: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            border-radius: 15px; 
+            padding: 20px; 
+            box-sizing: border-box; 
+            font-weight: 600; 
+            font-size: 18px; 
+            border: 1px solid var(--border); 
+        }
+        .flashcard-front { 
+            background-color: var(--bg-panel); 
+            color: var(--primary); 
+        }
+        .flashcard-back { 
+            background-color: var(--primary); 
+            color: white; 
+            transform: rotateY(180deg); 
+            position: relative; 
+        }
+        /* FLASHCARD SİLME BUTONU */
+        .btn-sil { 
+            position: absolute; 
+            top: 10px; 
+            right: 10px; 
+            background-color: #ff4757; 
+            color: white; 
+            border: none; 
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            font-size: 14px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            transition: 0.2s; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2); 
+            z-index: 10; 
+        }
+        .btn-sil:hover { 
+            background-color: #c0392b; 
+            transform: scale(1.1); 
+        }
+
+        /* Avatar */
+        .avatar-grid { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 15px; 
+            justify-content: center; 
+            margin-top: 20px; 
+        }
+        .avatar-option { 
+            font-size: 35px; 
+            cursor: pointer; 
+            padding: 10px; 
+            border-radius: 50%; 
+            border: 2px solid transparent; 
+            transition: 0.3s; 
+        }
+        .avatar-option:hover, .avatar-option.selected { 
+            background-color: var(--bg-body); 
+            border-color: var(--primary); 
+            transform: scale(1.1); 
+        }
+        .user-profile-mini { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            padding: 10px; 
+            background-color: var(--bg-body); 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+        }
+        .user-avatar-small { 
+            font-size: 30px; 
+        }
+        
+        /* Toast Bildirim */
+        .toast-container { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 10000; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+        }
+        .toast { 
+            min-width: 280px; 
+            padding: 16px 20px; 
+            border-radius: 12px; 
+            color: white; 
+            font-weight: 600; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25); 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            animation: slideIn 0.3s ease-out forwards; 
+            font-size: 14px; 
+        }
         .toast.show { opacity: 1; transform: translateX(0); }
         .toast.hide { animation: fadeOut 0.3s ease-out forwards; }
-        .toast-basarili { background: #10b981; } .toast-hata { background: #ef4444; } .toast-bilgi { background: #3b82f6; }
+        .toast-basarili { background-color: var(--success); } 
+        .toast-hata { background-color: var(--danger); } 
+        .toast-bilgi { background-color: #3b82f6; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
 
-        /* --- YENİ EKLENENLER (V42) --- */
         /* Müzik Player */
         .music-player { 
-            position: fixed; bottom: 30px; right: 30px; width: 280px; 
-            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-            padding: 15px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
-            border: 1px solid var(--border); z-index: 5000; display: flex; align-items: center; gap: 15px;
-            transition: all 0.3s ease;
+            position: fixed; 
+            bottom: 30px; 
+            right: 30px; 
+            width: 320px; 
+            background-color: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px); 
+            padding: 15px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            border: 1px solid var(--border); 
+            z-index: 5000; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            transition: all 0.3s ease; 
         }
-        body.dark-mode .music-player { background: rgba(31, 41, 55, 0.95); border-color: #374151; }
-        .music-info { flex: 1; overflow: hidden; }
-        .music-title { font-size: 13px; font-weight: 700; white-space: nowrap; color: var(--text-main); }
-        .music-status { font-size: 11px; color: var(--primary); font-weight: 600; }
-        .music-btn { background: var(--primary); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; font-size: 16px; box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4); transition: 0.2s; }
-        .music-btn:hover { transform: scale(1.1); }
-        .visualizer { display: flex; gap: 3px; height: 15px; align-items: flex-end; }
-        .bar { width: 4px; background: var(--primary); border-radius: 2px; animation: bounce 1s infinite; }
-        .bar:nth-child(1) { animation-duration: 0.8s; } .bar:nth-child(2) { animation-duration: 1.1s; } .bar:nth-child(3) { animation-duration: 0.9s; }
-        .paused .bar { animation: none; height: 3px; }
-        @keyframes bounce { 0%, 100% { height: 3px; } 50% { height: 15px; } }
-
-        /* Grafik Kartı */
+        body.dark-mode .music-player { 
+            background-color: rgba(31, 41, 55, 0.95); 
+            border-color: #374151; 
+        }
+        .music-info { 
+            flex: 1; 
+            overflow: hidden; 
+        }
+        .music-title { 
+            font-size: 13px; 
+            font-weight: 700; 
+            white-space: nowrap; 
+            color: var(--text-main); 
+        }
+        .music-status { 
+            font-size: 11px; 
+            color: var(--primary); 
+            font-weight: 600; 
+        }
+        .music-ctrl-btn { 
+            background: transparent; 
+            border: none; 
+            color: var(--text-sec); 
+            cursor: pointer; 
+            font-size: 18px; 
+            width: 30px; 
+            height: 30px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            transition: 0.2s; 
+        }
+        .music-ctrl-btn:hover { 
+            color: var(--primary); 
+            transform: scale(1.2); 
+        }
+        .music-play-btn { 
+            background-color: var(--primary); 
+            border: none; 
+            color: white; 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 16px; 
+            box-shadow: 0 5px 15px rgba(108, 92, 231, 0.4); 
+            transition: 0.2s; 
+        }
+        .music-play-btn:hover { 
+            transform: scale(1.1); 
+        }
+        
         .chart-card { grid-column: span 2; }
-        @media screen and (max-width: 768px) { .chart-card { grid-column: span 1; } }
-
-        /* Hızlı Linkler */
-        .quick-links { display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap; }
-        .q-link { background: var(--bg-panel); padding: 15px 25px; border-radius: 12px; border: 1px solid var(--border); color: var(--text-main); font-weight: 600; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; box-shadow: var(--shadow); text-decoration: none; font-size: 14px; }
-        .q-link:hover { transform: translateY(-3px); border-color: var(--primary); color: var(--primary); }
+        .leaderboard-card { grid-column: span 2; }
+        .quick-links { 
+            display: flex; 
+            gap: 15px; 
+            margin-top: 30px; 
+            flex-wrap: wrap; 
+        }
+        .q-link { 
+            background-color: var(--bg-panel); 
+            padding: 15px 25px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border); 
+            color: var(--text-main); 
+            font-weight: 600; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            box-shadow: var(--shadow); 
+            text-decoration: none; 
+            font-size: 14px; 
+        }
+        .q-link:hover { 
+            transform: translateY(-3px); 
+            border-color: var(--primary); 
+            color: var(--primary); 
+        }
+        .leader-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px; 
+            border-bottom: 1px solid var(--border); 
+            font-size: 14px; 
+        }
+        .leader-item:last-child { 
+            border-bottom: none; 
+        }
+        .leader-rank { 
+            font-weight: 800; 
+            color: var(--text-sec); 
+            width: 30px; 
+        }
+        .leader-user { 
+            flex: 1; 
+            font-weight: 600; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .leader-score { 
+            font-weight: 700; 
+            color: var(--primary); 
+            background-color: rgba(108, 92, 231, 0.1); 
+            padding: 5px 10px; 
+            border-radius: 8px; 
+        }
     </style>
 </head>
 <body>
@@ -178,17 +1000,14 @@
     <div id="toastContainer" class="toast-container"></div>
 
     <div id="musicPlayer" class="music-player">
-        <div class="visualizer paused" id="visualizer">
-            <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-        </div>
-        <div class="music-info">
-            <div class="music-title">Lo-Fi Study Beats</div>
+        <button class="music-ctrl-btn" onclick="prevSong()"><i class="fas fa-backward"></i></button>
+        <button class="music-play-btn" onclick="toggleMusic()"><i class="fas fa-play" id="playIcon"></i></button>
+        <button class="music-ctrl-btn" onclick="nextSong()"><i class="fas fa-forward"></i></button>
+        <div class="music-info" style="margin-left:10px;">
+            <div class="music-title" id="songTitle">🌧️ Rainy Lo-Fi</div>
             <div class="music-status" id="musicStatus">Duraklatıldı</div>
         </div>
-        <button class="music-btn" onclick="toggleMusic()"><i class="fas fa-play" id="playIcon"></i></button>
-        <audio id="bgMusic" loop>
-            <source src="https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=lofi-study-112191.mp3" type="audio/mpeg">
-        </audio>
+        <audio id="bgMusic" preload="auto"></audio>
     </div>
 
     <audio id="soundMove" src="https://images.chesscomfiles.com/chess-themes/sounds/_common/move-self.mp3"></audio>
@@ -211,14 +1030,21 @@
     </div>
 
     <div id="appScreen" class="container gizli">
+        
         <div class="sidebar">
             <h3 style="text-align:center; color: var(--primary); margin-bottom: 20px; font-size: 26px; font-weight: 900; letter-spacing: -1px; display:flex; align-items:center; justify-content:center; gap:10px;"><i class="fas fa-cube"></i> PORTAL</h3>
             
             <div class="user-profile-mini">
                 <div class="user-avatar-small" id="sideAvatar">🎓</div>
-                <div style="overflow:hidden;">
+                <div style="overflow:hidden; width:100%;">
                     <div style="font-size:14px; font-weight:700;" id="sideName">Kullanıcı</div>
                     <div style="font-size:11px; color:var(--text-sec);">Öğrenci</div>
+                    
+                    <div class="xp-container" style="padding: 5px; margin: 5px 0; border:none; background:transparent; text-align:left;">
+                        <span class="level-badge" id="sideLevel">Lvl 1</span>
+                        <div class="xp-bar-bg"><div id="sideXpBar" class="xp-bar-fill"></div></div>
+                    </div>
+                    <div class="streak-badge"><i class="fas fa-fire"></i> <span id="sideStreak">0</span> Gün</div>
                 </div>
             </div>
 
@@ -228,8 +1054,9 @@
 
             <div class="menu-item active" onclick="sayfaGec('dashboard')"><i class="fas fa-home"></i> Ana Sayfa</div>
             <div class="menu-item" onclick="sayfaGec('pomodoro')"><i class="fas fa-clock"></i> Odaklanma</div>
-            <div class="menu-item" onclick="sayfaGec('oyunlar')"><i class="fas fa-chess-king"></i> Satranç</div>
-            <div class="menu-item" onclick="sayfaGec('todo')"><i class="fas fa-check-square"></i> Görevler</div>
+            <div class="menu-item" onclick="sayfaGec('oyunlar')"><i class="fas fa-chess-king"></i> Arena</div>
+            <div class="menu-item" onclick="sayfaGec('kartlar')"><i class="fas fa-layer-group"></i> sor çöz</div>
+            <div class="menu-item" onclick="sayfaGec('todo')"><i class="fas fa-check-square"></i> Görev Panosu</div>
             <div class="menu-item" onclick="sayfaGec('notlar')"><i class="fas fa-calculator"></i> Hesaplamalar</div>
             <div class="menu-item" onclick="sayfaGec('program')"><i class="fas fa-calendar-alt"></i> Ders Programı</div>
             <div class="menu-item" onclick="sayfaGec('gunluk')"><i class="fas fa-book"></i> Gizli Günlük</div>
@@ -242,6 +1069,7 @@
         </div>
 
         <div class="content">
+            
             <div id="dashboard" class="page active">
                 <div style="display:flex; align-items:center; gap:15px; margin-bottom: 20px;">
                     <div id="dashAvatar" style="font-size: 60px;">🎓</div>
@@ -259,15 +1087,14 @@
                 <div class="card-grid">
                     <div class="stat-card">
                         <i class="fas fa-trophy" style="font-size:40px; color:var(--primary); margin-bottom:15px; display:block;"></i>
-                        <h3>Satranç Puanı</h3><h1 id="dashPuan">0</h1>
+                        <h3>Toplam XP</h3><h1 id="dashXP">0</h1>
                     </div>
                     <div class="stat-card">
                         <i class="fas fa-check-circle" style="font-size:40px; color:#10b981; margin-bottom:15px; display:block;"></i>
-                        <h3>Bekleyen Görev</h3><h1 id="dashGorev">0</h1>
+                        <h3>Günlük Seri</h3><h1 id="dashStreakVal">0</h1>
                     </div>
-                    
                     <div class="stat-card chart-card" style="text-align:left;">
-                        <h3 style="margin-bottom:15px;">📊 Haftalık Odaklanma (Pomodoro)</h3>
+                        <h3 style="margin-bottom:15px;">📊 Haftalık Odaklanma</h3>
                         <div style="height: 250px; width:100%;">
                             <canvas id="myChart"></canvas>
                         </div>
@@ -280,6 +1107,39 @@
                     <a href="https://chat.openai.com/" target="_blank" class="q-link"><i class="fas fa-robot" style="color:#00b894;"></i> ChatGPT</a>
                     <a href="https://youtube.com" target="_blank" class="q-link"><i class="fab fa-youtube" style="color:#d63031;"></i> YouTube</a>
                     <a href="https://translate.google.com/" target="_blank" class="q-link"><i class="fas fa-language" style="color:#0984e3;"></i> Çeviri</a>
+                </div>
+            </div>
+
+            <div id="kartlar" class="page">
+                <h2 style="font-weight: 800; margin-bottom: 25px;">🧠 Bilgi Kartları (Flashcards)</h2>
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <input id="kartSoru" placeholder="Soru (Ön Yüz)">
+                    <input id="kartCevap" placeholder="Cevap (Arka Yüz)">
+                    <button class="btn btn-yesil" onclick="kartEkle()">Ekle</button>
+                </div>
+                <div id="flashcardList" class="flashcard-container"></div>
+            </div>
+
+            <div id="todo" class="page" style="height:100%;">
+                <h2 style="font-weight: 800; margin-bottom: 25px;">📋 Görev Panosu (Kanban)</h2>
+                <div style="display:flex; gap:15px; margin-bottom: 20px;">
+                    <input id="todoIn" placeholder="Yeni görev ekle..." style="flex:2;">
+                    <input type="number" id="todoTime" placeholder="Süre (Sn)" style="width:140px;">
+                    <button class="btn btn-yesil" style="width:160px;" onclick="gorevEkle()">Ekle</button>
+                </div>
+                <div class="kanban-board">
+                    <div class="kanban-column">
+                        <div class="kanban-header">📌 Yapılacaklar <span id="count-todo" class="badge">0</span></div>
+                        <div id="col-todo" class="kanban-items"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="kanban-header">⚡ Sürüyor <span id="count-progress" class="badge">0</span></div>
+                        <div id="col-progress" class="kanban-items"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="kanban-header">✅ Bitti <span id="count-done" class="badge">0</span></div>
+                        <div id="col-done" class="kanban-items"></div>
+                    </div>
                 </div>
             </div>
 
@@ -331,8 +1191,18 @@
             </div>
 
             <div id="oyunlar" class="page" style="position: relative;">
-                <div id="beklemeEkrani" class="gizli"><div id="beklemeIcerik"><div class="spinner"></div><h2>RAKİP ARANIYOR...</h2><button onclick="beklemeyiIptalEt()" class="btn btn-kirmizi">İptal</button></div><div id="geriSayimIcerik" class="gizli" style="text-align:center;"><h2>RAKİP BULUNDU!</h2><h1 id="geriSayimText" style="font-size:120px; color:var(--primary); margin:0;">5</h1></div></div>
+                <div id="beklemeEkrani" class="gizli">
+                    <div id="beklemeIcerik">
+                        <div class="spinner"></div><h2>RAKİP ARANIYOR...</h2>
+                        <button onclick="beklemeyiIptalEt()" class="btn btn-kirmizi">İptal</button>
+                    </div>
+                    <div id="geriSayimIcerik" class="gizli" style="text-align:center;">
+                        <h2>RAKİP BULUNDU!</h2><h1 id="geriSayimText" style="font-size:120px; color:var(--primary); margin:0;">5</h1>
+                    </div>
+                </div>
+                
                 <h2 style="text-align:center; margin-bottom: 30px; font-weight: 800;">♟️ Satranç Arenası</h2>
+                
                 <div id="lobiButonlari" style="text-align:center; padding:60px; background:var(--bg-panel); border-radius:25px; border:1px solid var(--border);">
                     <div id="botSecimEkrani" class="gizli">
                         <h3 style="margin-bottom:20px; color:var(--text-sec);">Zorluk Seviyesi Seç</h3>
@@ -346,36 +1216,53 @@
                         <button class="btn btn-yesil" onclick="dereceliGir()" style="font-size: 18px; padding: 18px 40px; margin-left: 15px;">🔥 Online Dereceli</button>
                     </div>
                 </div>
+
                 <div id="oyunAlani" class="gizli" style="text-align:center;">
                     <div class="chess-container">
-                        <div class="timers"><div id="timerW" class="timer-box">⚪ 10:00</div><div id="timerB" class="timer-box">⚫ 10:00</div></div>
+                        <div class="timers">
+                            <div id="timerW" class="timer-box">⚪ 10:00</div>
+                            <div id="timerB" class="timer-box">⚫ 10:00</div>
+                        </div>
                         <div id="myBoard"></div>
-                        <div style="margin-top:30px;"><button class="btn btn-kirmizi" onclick="pesEt()" style="font-size: 16px; padding: 15px 30px;"><i class="fas fa-flag"></i> Pes Et / Çık</button></div>
+                        <div style="margin-top:30px;">
+                            <button class="btn btn-kirmizi" onclick="pesEt()" style="font-size: 16px; padding: 15px 30px;"><i class="fas fa-flag"></i> Pes Et / Çık</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card leaderboard-card" style="text-align:left; margin-top:30px;">
+                    <h3 style="margin-bottom:15px; display:flex; align-items:center; gap:10px;">🏆 En İyi Oyuncular</h3>
+                    <div id="leaderboardList" style="max-height: 250px; overflow-y:auto;">
+                        <p style="text-align:center; color:#999; margin-top:20px;">Yükleniyor...</p>
                     </div>
                 </div>
             </div>
 
-            <div id="todo" class="page">
-                <h2 style="font-weight: 800; margin-bottom: 25px;">⏱️ Zamanlı Görevler</h2>
-                <div style="display:flex; gap:15px; margin-bottom: 30px;">
-                    <input id="todoIn" placeholder="Örn: 20 sayfa kitap oku" style="flex:2;">
-                    <input type="number" id="todoTime" placeholder="Süre (Sn)" style="width:140px;">
-                    <button class="btn btn-yesil" style="width:160px;" onclick="gorevEkle()">Başlat</button>
-                </div>
-                <div id="todoList"></div>
-            </div>
-
             <div id="notlar" class="page">
                 <h2 style="font-weight: 800; margin-bottom: 25px;">🧮 Hesaplama Merkezi</h2>
-                <div class="calc-group"><div class="calc-title"><i class="fas fa-university"></i> Üniversite Not</div><div style="display:flex; gap:15px;"><input id="dersAdi" placeholder="Ders"><input id="vizeNot" type="number" placeholder="Vize"><input id="finalNot" type="number" placeholder="Final"><button class="btn btn-yesil" onclick="notHesapla()">Hesapla</button></div></div>
-                <div class="calc-group"><div class="calc-title"><i class="fas fa-school"></i> Lise Ortalama</div><div style="display:flex; gap:15px;"><input id="liseDers" placeholder="Ders"><input id="yazili1" type="number" placeholder="1. Yazılı"><input id="yazili2" type="number" placeholder="2. Yazılı"><input id="sozlu" type="number" placeholder="Sözlü"><button class="btn btn-yesil" onclick="liseHesapla()">Hesapla</button></div></div>
-                <div class="calc-group"><div class="calc-title"><i class="fas fa-clipboard-check"></i> TYT / AYT Net</div><div style="display:flex; gap:15px;"><input id="tytDers" placeholder="Ders"><input id="tytDogru" type="number" placeholder="Doğru"><input id="tytYanlis" type="number" placeholder="Yanlış"><button class="btn btn-yesil" onclick="tytHesapla()">Neti Gör</button></div></div>
+                <div class="calc-group"><div class="calc-title"><i class="fas fa-university"></i> Üniversite Not Hesapla</div><div style="display:flex; gap:15px;"><input id="dersAdi" placeholder="Ders"><input id="vizeNot" type="number" placeholder="Vize (%40)"><input id="finalNot" type="number" placeholder="Final (%60)"><button class="btn btn-yesil" onclick="notHesapla()">Hesapla</button></div></div>
+                <div class="calc-group"><div class="calc-title"><i class="fas fa-school"></i> Lise Ortalama Hesapla</div><div style="display:flex; gap:15px;"><input id="liseDers" placeholder="Ders"><input id="yazili1" type="number" placeholder="1. Yazılı"><input id="yazili2" type="number" placeholder="2. Yazılı"><input id="sozlu" type="number" placeholder="Sözlü"><button class="btn btn-yesil" onclick="liseHesapla()">Hesapla</button></div></div>
+                <div class="calc-group"><div class="calc-title"><i class="fas fa-clipboard-check"></i> TYT / AYT Net Hesapla</div><div style="display:flex; gap:15px;"><input id="tytDers" placeholder="Ders"><input id="tytDogru" type="number" placeholder="Doğru"><input id="tytYanlis" type="number" placeholder="Yanlış"><button class="btn btn-yesil" onclick="tytHesapla()">Neti Gör</button></div></div>
                 <div id="notListesi"></div>
             </div>
 
             <div id="program" class="page">
                 <h2 style="font-weight: 800; margin-bottom: 25px;">📅 Haftalık Ders Programı</h2>
-                <div style="overflow-x:auto;"><table id="programTablosu"><thead><tr><th>Saat</th><th>Pzt</th><th>Sal</th><th>Çar</th><th>Per</th><th>Cum</th></tr></thead><tbody></tbody></table></div>
+                <div style="overflow-x:auto;">
+                    <table id="programTablosu">
+                        <thead>
+                            <tr>
+                                <th>Saat</th>
+                                <th>Pzt</th>
+                                <th>Sal</th>
+                                <th>Çar</th>
+                                <th>Per</th>
+                                <th>Cum</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
                 <button class="btn btn-yesil" style="margin-top:25px; width: 100%; padding: 18px;" onclick="programKaydet()"><i class="fas fa-save"></i> Tabloyu Kaydet</button>
             </div>
 
@@ -389,12 +1276,18 @@
             <div id="sohbet" class="page">
                 <h2 style="font-weight: 800; margin-bottom: 25px;">💬 Genel Sohbet</h2>
                 <div id="chatArea" style="height:500px; overflow-y:scroll; border:2px solid var(--border); padding:25px; border-radius:16px; background:var(--bg-panel); margin-bottom:20px;"></div>
-                <div style="display:flex; gap:15px;"><input id="chatIn" placeholder="Bir mesaj yaz..."><button class="btn btn-yesil" style="width:140px;" onclick="chatYolla()">Yolla</button></div>
+                <div style="display:flex; gap:15px;">
+                    <input id="chatIn" placeholder="Bir mesaj yaz...">
+                    <button class="btn btn-yesil" style="width:140px;" onclick="chatYolla()">Yolla</button>
+                </div>
             </div>
 
             <div id="iletisim" class="page">
                 <h2 style="font-weight: 800; margin-bottom: 25px;">📬 Şikayet ve Öneri</h2>
-                <select id="oneriTur"><option value="Öneri">💡 Öneri</option><option value="Şikayet">⚠️ Şikayet</option></select>
+                <select id="oneriTur">
+                    <option value="Öneri">💡 Öneri</option>
+                    <option value="Şikayet">⚠️ Şikayet</option>
+                </select>
                 <input id="oneriKonu" placeholder="Örn: Kantin Fiyatları">
                 <textarea id="oneriMesaj" rows="8" placeholder="Örn: Merhaba, kantindeki fiyatlar biraz yüksek..."></textarea>
                 <button class="btn btn-yesil" onclick="oneriYolla()" style="background:var(--primary); width:100%; margin-top: 15px;"><i class="fas fa-envelope"></i> Gönder</button>
@@ -403,31 +1296,60 @@
     </div>
 
     <script>
-        // MÜZİK PLAYER MANTIĞI
+        // --- MÜZİK PLAYER ---
         const music = document.getElementById('bgMusic');
         const playIcon = document.getElementById('playIcon');
-        const visualizer = document.getElementById('visualizer');
         const musicStatus = document.getElementById('musicStatus');
+        const songTitle = document.getElementById('songTitle');
         let isPlaying = false;
+        let currentSongIndex = 0;
+
+        const playlist = [
+            { title: "🌧️ Rainy Lo-Fi", url: "https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3" },
+            { title: "☕ Coffee Jazz", url: "https://cdn.pixabay.com/download/audio/2022/03/24/audio_06259e0a01.mp3" },
+            { title: "🎹 Deep Focus", url: "https://cdn.pixabay.com/download/audio/2022/02/10/audio_fc8c83e20b.mp3" },
+            { title: "🌌 Night Vibe", url: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3" },
+            { title: "🌊 Ocean Chill", url: "https://cdn.pixabay.com/download/audio/2022/01/21/audio_31743c58bd.mp3" },
+            { title: "🎸 Acoustic", url: "https://cdn.pixabay.com/download/audio/2022/11/02/audio_7713f0907e.mp3" }
+        ];
+
+        music.src = playlist[0].url;
 
         function toggleMusic() {
             if (isPlaying) {
                 music.pause();
                 playIcon.className = 'fas fa-play';
-                visualizer.classList.add('paused');
                 musicStatus.innerText = "Duraklatıldı";
                 musicStatus.style.color = "var(--text-sec)";
             } else {
                 music.play();
                 playIcon.className = 'fas fa-pause';
-                visualizer.classList.remove('paused');
-                musicStatus.innerText = "Çalıyor • Lo-Fi Beats";
+                musicStatus.innerText = "Çalıyor • " + playlist[currentSongIndex].title;
                 musicStatus.style.color = "#00b894";
             }
             isPlaying = !isPlaying;
         }
 
-        // GRAFİK (Chart.js)
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % playlist.length;
+            loadAndPlay();
+        }
+
+        function prevSong() {
+            currentSongIndex = (currentSongIndex - 1 + playlist.length) % playlist.length;
+            loadAndPlay();
+        }
+
+        function loadAndPlay() {
+            music.src = playlist[currentSongIndex].url;
+            songTitle.innerText = playlist[currentSongIndex].title;
+            if (isPlaying) {
+                music.play();
+                musicStatus.innerText = "Çalıyor • " + playlist[currentSongIndex].title;
+            }
+        }
+
+        // --- GRAFİK ---
         const ctx = document.getElementById('myChart');
         if(ctx) {
             new Chart(ctx, {
@@ -436,7 +1358,7 @@
                     labels: ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
                     datasets: [{
                         label: 'Tamamlanan Pomodoro',
-                        data: [2, 4, 3, 5, 2, 6, 4], // Örnek Veri
+                        data: [2, 4, 3, 5, 2, 6, 4],
                         borderColor: '#6c5ce7',
                         backgroundColor: 'rgba(108, 92, 231, 0.1)',
                         tension: 0.4,
@@ -446,166 +1368,690 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
+                    scales: { y: { beginAtZero: true } }
                 }
             });
         }
 
-        // DİĞER FONKSİYONLAR (V40 ile Aynı)
-        const sounds = { move: document.getElementById('soundMove'), capture: document.getElementById('soundCapture'), notify: document.getElementById('soundNotify'), alarm: document.getElementById('soundAlarm') };
-        function playSound(type) { if(sounds[type]) sounds[type].play().catch(e=>{}); }
+        // --- SESLER ---
+        const sounds = {
+            move: document.getElementById('soundMove'),
+            capture: document.getElementById('soundCapture'),
+            notify: document.getElementById('soundNotify'),
+            alarm: document.getElementById('soundAlarm')
+        };
+        
+        function playSound(type) {
+            if (sounds[type]) {
+                sounds[type].play().catch(e => {});
+            }
+        }
 
-        const sozler = [ "Başarı, her gün tekrarlanan küçük çabaların toplamıdır.", "Gelecek, bugünden hazırlananlara aittir.", "Sadece sözlükte 'başarı', 'çalışma'dan önce gelir.", "Zorluklar, başarının değerini artıran süslerdir.", "Bir gün değil, her gün istersen olur.", "Hata yapmaktan korkma, denememekten kork." ];
+        // --- GÜNÜN SÖZÜ ---
+        const sozler = [
+            "Başarı, her gün tekrarlanan küçük çabaların toplamıdır.",
+            "Gelecek, bugünden hazırlananlara aittir.",
+            "Sadece sözlükte 'başarı', 'çalışma'dan önce gelir.",
+            "Zorluklar, başarının değerini artıran süslerdir.",
+            "Bir gün değil, her gün istersen olur.",
+            "Hata yapmaktan korkma, denememekten kork."
+        ];
         document.getElementById("gununSozu").innerText = `"${sozler[Math.floor(Math.random() * sozler.length)]}"`;
 
+        // --- AVATAR ---
         let seciliAvatar = "🎓";
-        function avatarSec(ikon) { seciliAvatar = ikon; document.querySelectorAll(".avatar-option").forEach(d => d.classList.remove("selected")); event.target.classList.add("selected"); }
-        function avatarKaydet() { database.ref('users/'+auth.currentUser.uid).update({avatar: seciliAvatar}); document.getElementById("sideAvatar").innerText = seciliAvatar; document.getElementById("dashAvatar").innerText = seciliAvatar; bildirim("Avatar güncellendi!", "basarili"); }
+        
+        function avatarSec(ikon) {
+            seciliAvatar = ikon;
+            document.querySelectorAll(".avatar-option").forEach(d => d.classList.remove("selected"));
+            event.target.classList.add("selected");
+        }
+        
+        function avatarKaydet() {
+            database.ref('users/'+auth.currentUser.uid).update({avatar: seciliAvatar});
+            document.getElementById("sideAvatar").innerText = seciliAvatar;
+            document.getElementById("dashAvatar").innerText = seciliAvatar;
+            bildirim("Avatar güncellendi!", "basarili");
+        }
 
-        function temaDegistir() { document.body.classList.toggle('dark-mode'); localStorage.setItem('tema', document.body.classList.contains('dark-mode') ? 'koyu' : 'acik'); }
-        if(localStorage.getItem('tema') === 'koyu') { document.body.classList.add('dark-mode'); }
+        // --- TEMA ---
+        function temaDegistir() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('tema', document.body.classList.contains('dark-mode') ? 'koyu' : 'acik');
+        }
+        if (localStorage.getItem('tema') === 'koyu') {
+            document.body.classList.add('dark-mode');
+        }
 
-        function bildirim(msj, tur="bilgi") { const c = document.getElementById('toastContainer'); const t = document.createElement('div'); let icon = tur === 'basarili' ? 'check-circle' : (tur === 'hata' ? 'exclamation-circle' : 'info-circle'); t.className = `toast toast-${tur}`; t.innerHTML = `<i class="fas fa-${icon}"></i> ${msj}`; c.appendChild(t); setTimeout(() => t.classList.add('show'), 10); setTimeout(() => { t.classList.remove('show'); t.classList.add('hide'); setTimeout(() => t.remove(), 300); }, 3000); if(tur !== 'bilgi') playSound('notify'); }
-        window.alert = function(m) { let t = "bilgi"; if(m.toLowerCase().includes("hata") || m.toLowerCase().includes("dolu")) t = "hata"; else if(m.toLowerCase().includes("başarılı")) t = "basarili"; bildirim(m, t); }
+        // --- BİLDİRİM ---
+        function bildirim(msj, tur="bilgi") {
+            const c = document.getElementById('toastContainer');
+            const t = document.createElement('div');
+            let icon = tur === 'basarili' ? 'check-circle' : (tur === 'hata' ? 'exclamation-circle' : 'info-circle');
+            t.className = `toast toast-${tur}`;
+            t.innerHTML = `<i class="fas fa-${icon}"></i> ${msj}`;
+            c.appendChild(t);
+            setTimeout(() => t.classList.add('show'), 10);
+            setTimeout(() => { 
+                t.classList.remove('show'); 
+                t.classList.add('hide'); 
+                setTimeout(() => t.remove(), 300); 
+            }, 3000);
+            if (tur !== 'bilgi') playSound('notify');
+        }
+        window.alert = function(m) {
+            let t = "bilgi";
+            if (m.toLowerCase().includes("hata") || m.toLowerCase().includes("dolu")) t = "hata";
+            else if (m.toLowerCase().includes("başarılı")) t = "basarili";
+            bildirim(m, t);
+        }
 
-        const firebaseConfig = { apiKey: "AIzaSyDxsw-OTjvlrPvscjO4LsGzKEceKOW-Iuc", authDomain: "ogrenci-portali-f4cad.firebaseapp.com", databaseURL: "https://ogrenci-portali-f4cad-default-rtdb.firebaseio.com", projectId: "ogrenci-portali-f4cad", storageBucket: "ogrenci-portali-f4cad.firebasestorage.app", messagingSenderId: "901945087688", appId: "1:901945087688:web:24f1a877f49a15edc577fd", measurementId: "G-JEL3H6H45T" };
+        // --- FIREBASE ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyDxsw-OTjvlrPvscjO4LsGzKEceKOW-Iuc",
+          authDomain: "ogrenci-portali-f4cad.firebaseapp.com",
+          databaseURL: "https://ogrenci-portali-f4cad-default-rtdb.firebaseio.com",
+          projectId: "ogrenci-portali-f4cad",
+          storageBucket: "ogrenci-portali-f4cad.firebasestorage.app",
+          messagingSenderId: "901945087688",
+          appId: "1:901945087688:web:24f1a877f49a15edc577fd",
+          measurementId: "G-JEL3H6H45T"
+        };
+
         try { firebase.initializeApp(firebaseConfig); } catch(e){ console.error(e); }
-        const database = firebase.database(); const auth = firebase.auth();
+        const database = firebase.database();
+        const auth = firebase.auth();
 
         let user = null, kayit = false;
         let board = null, game = new Chess();
         let myColor = 'w', aktifMod = null, wTime=600, bTime=600, chessInterval=null, botZorluk = 'kolay';
 
-        function modDegistir() { kayit = !kayit; document.getElementById("authTitle").innerText = kayit ? "Kayıt Ol" : "Giriş Yap"; document.getElementById("btnIslem").innerText = kayit ? "Kayıt Ol" : "Giriş Yap"; document.getElementById("toggleText").innerHTML = kayit ? "Hesabın var mı? <b>Giriş Yap</b>" : "Hesabın yok mu? <b>Kayıt Ol</b>"; kayit ? document.getElementById("emailDiv").classList.remove("gizli") : document.getElementById("emailDiv").classList.add("gizli"); }
+        // --- GİRİŞ / KAYIT ---
+        function modDegistir() {
+            kayit = !kayit;
+            document.getElementById("authTitle").innerText = kayit ? "Kayıt Ol" : "Giriş Yap";
+            document.getElementById("btnIslem").innerText = kayit ? "Kayıt Ol" : "Giriş Yap";
+            document.getElementById("toggleText").innerHTML = kayit ? "Hesabın var mı? <b>Giriş Yap</b>" : "Hesabın yok mu? <b>Kayıt Ol</b>";
+            if (kayit) {
+                document.getElementById("emailDiv").classList.remove("gizli");
+            } else {
+                document.getElementById("emailDiv").classList.add("gizli");
+            }
+        }
+
         function islemYap() {
-            let k=document.getElementById("kAdiInput").value.trim(), p=document.getElementById("sifreInput").value;
-            if(!k||!p) return alert("Lütfen alanları doldurun!");
-            if(kayit) {
-                let m=document.getElementById("emailInput").value.trim(); if(!m) return alert("E-Posta gerekli!");
-                database.ref('users').orderByChild('username').equalTo(k).once('value', s=>{
-                    if(s.exists()) alert("Bu kullanıcı adı alınmış!");
-                    else auth.createUserWithEmailAndPassword(m,p).then(c=>{ database.ref('users/'+c.user.uid).set({username:k,email:m,avatar:'🎓',puan:0}); alert("Kayıt Başarılı! Giriş yapılıyor..."); }).catch(e=>alert("Hata: " + e.message));
+            let k = document.getElementById("kAdiInput").value.trim();
+            let p = document.getElementById("sifreInput").value;
+            
+            if (!k || !p) return alert("Lütfen alanları doldurun!");
+            
+            if (kayit) {
+                let m = document.getElementById("emailInput").value.trim();
+                if (!m) return alert("E-Posta gerekli!");
+                
+                database.ref('users').orderByChild('username').equalTo(k).once('value', s => {
+                    if (s.exists()) {
+                        alert("Bu kullanıcı adı alınmış!");
+                    } else {
+                        auth.createUserWithEmailAndPassword(m, p).then(c => {
+                            let todayStr = new Date().toDateString();
+                            database.ref('users/'+c.user.uid).set({
+                                username: k, email: m, avatar: '🎓', puan: 0,
+                                xp: 0, level: 1, streak: 1, lastLogin: todayStr
+                            });
+                            alert("Kayıt Başarılı! Giriş yapılıyor...");
+                        }).catch(e => alert("Hata: " + e.message));
+                    }
                 });
             } else {
-                database.ref('users').orderByChild('username').equalTo(k).once('value', s=>{
-                    if(s.exists()) auth.signInWithEmailAndPassword(Object.values(s.val())[0].email,p).catch(e=>alert("Şifre Yanlış!"));
-                    else alert("Kullanıcı bulunamadı!");
+                database.ref('users').orderByChild('username').equalTo(k).once('value', s => {
+                    if (s.exists()) {
+                        auth.signInWithEmailAndPassword(Object.values(s.val())[0].email, p).catch(e => alert("Şifre Yanlış!"));
+                    } else {
+                        alert("Kullanıcı bulunamadı!");
+                    }
                 });
             }
         }
-        auth.onAuthStateChanged(u=>{ if(u){ database.ref('users/'+u.uid).once('value').then(s=>{ 
-            let val = s.val(); user=val.username; 
-            document.getElementById("authScreen").classList.add("gizli"); document.getElementById("appScreen").classList.remove("gizli"); 
-            document.getElementById("dashUser").innerText=user; document.getElementById("sideName").innerText=user;
-            if(val.avatar) { document.getElementById("sideAvatar").innerText=val.avatar; document.getElementById("dashAvatar").innerText=val.avatar; }
-            if(val.puan) document.getElementById("dashPuan").innerText=val.puan;
-            yukleVeriler(); baslatSohbet(); 
-        }); } else { document.getElementById("authScreen").classList.remove("gizli"); document.getElementById("appScreen").classList.add("gizli"); } });
         
-        function cikisYap(){auth.signOut().then(()=>location.reload());}
-        function sifreSifirla(){let m=prompt("E-Posta adresinizi girin:");if(m)auth.sendPasswordResetEmail(m).then(()=>alert("Mail gönderildi!")).catch(e=>alert(e.message));}
-        function getRef(p){return database.ref(p+'/'+user);}
+        // --- OTURUM YÖNETİMİ ---
+        auth.onAuthStateChanged(u => {
+            if (u) {
+                database.ref('users/'+u.uid).once('value').then(s => {
+                    let val = s.val();
+                    user = val.username;
+                    
+                    let today = new Date();
+                    let todayStr = today.toDateString();
+                    let yesterday = new Date(today);
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    let yesterdayStr = yesterday.toDateString();
+                    
+                    let currentStreak = val.streak || 0;
+                    let lastLogin = val.lastLogin || "";
+                    
+                    if (lastLogin === yesterdayStr) {
+                        currentStreak++;
+                    } else if (lastLogin !== todayStr) {
+                        currentStreak = 1;
+                    }
+                    
+                    database.ref('users/'+u.uid).update({ lastLogin: todayStr, streak: currentStreak });
+                    
+                    document.getElementById("authScreen").classList.add("gizli");
+                    document.getElementById("appScreen").classList.remove("gizli");
+                    document.getElementById("dashUser").innerText = user;
+                    document.getElementById("sideName").innerText = user;
+                    document.getElementById("sideStreak").innerText = currentStreak;
+                    document.getElementById("dashStreak").innerText = currentStreak;
+                    document.getElementById("dashStreakVal").innerText = currentStreak;
+                    
+                    if(val.avatar) {
+                        document.getElementById("sideAvatar").innerText = val.avatar;
+                        document.getElementById("dashAvatar").innerText = val.avatar;
+                    }
+                    if(val.puan) document.getElementById("dashPuan").innerText = val.puan;
+                    
+                    updateXPUI(val.xp || 0, val.level || 1);
+                    
+                    let sonSayfa = localStorage.getItem('aktifSayfa') || 'dashboard';
+                    sayfaGec(sonSayfa);
+                    yukleVeriler(); baslatSohbet(); liderlikTablosuGuncelle();
+                });
+            } else {
+                document.getElementById("authScreen").classList.remove("gizli");
+                document.getElementById("appScreen").classList.add("gizli");
+            }
+        });
+        
+        function cikisYap() {
+            localStorage.removeItem('aktifSayfa');
+            auth.signOut().then(() => location.reload());
+        }
 
-        let pInt, pSur=25*60, pDur=false, pMod=""; 
+        function sifreSifirla() {
+            let m = prompt("E-Posta adresinizi girin:");
+            if (m) {
+                auth.sendPasswordResetEmail(m)
+                    .then(() => alert("Mail gönderildi!"))
+                    .catch(e => alert(e.message));
+            }
+        }
+
+        function getRef(p) { return database.ref(p + '/' + user); }
+
+        // --- XP SİSTEMİ ---
+        function gainXP(amount) {
+            database.ref('users/'+auth.currentUser.uid).once('value', s => {
+                let d = s.val();
+                let currentXP = (d.xp || 0) + amount;
+                let currentLevel = Math.floor(currentXP / 100) + 1;
+                
+                if (currentLevel > (d.level || 1)) {
+                    bildirim("TEBRİKLER! SEVİYE ATLADIN! 🎉", "basarili");
+                    playSound('notify');
+                }
+                
+                database.ref('users/'+auth.currentUser.uid).update({ xp: currentXP, level: currentLevel });
+                updateXPUI(currentXP, currentLevel);
+                bildirim(`+${amount} XP Kazanıldı!`, "bilgi");
+            });
+        }
+
+        function updateXPUI(xp, level) {
+            document.getElementById("sideLevel").innerText = "Lvl " + level;
+            document.getElementById("dashXP").innerText = xp;
+            let progress = xp % 100;
+            document.getElementById("sideXpBar").style.width = progress + "%";
+        }
+
+        // --- LİDERLİK ---
+        function liderlikTablosuGuncelle() {
+            database.ref('users').orderByChild('puan').limitToLast(5).on('value', snap => {
+                let list = document.getElementById("leaderboardList"); list.innerHTML = "";
+                let users = [];
+                snap.forEach(s => users.push(s.val()));
+                users.reverse().forEach((u, i) => {
+                    let rank = i + 1;
+                    let icon = rank === 1 ? '🥇' : (rank === 2 ? '🥈' : (rank === 3 ? '🥉' : `#${rank}`));
+                    list.innerHTML += `
+                    <div class="leader-item">
+                        <div class="leader-rank">${icon}</div>
+                        <div class="leader-user"><span style="font-size:20px;">${u.avatar||'🎓'}</span> ${u.username}</div>
+                        <div class="leader-score">${u.puan||0} P</div>
+                    </div>`;
+                });
+            });
+        }
+
+        // --- POMODORO ---
+        let pInt, pSur = 25 * 60, pDur = false, pMod = ""; 
         function dersBaslat() {
             let dk = parseInt(document.getElementById("pomoDersSure").value) || 25;
-            if(pMod === 'mola' && pSur > 0 && pDur) return alert("Moladasın! Önce bitir.");
-            if(pMod !== 'ders') { clearInterval(pInt); pSur = dk * 60; pMod = 'ders'; }
-            pDur = true; document.getElementById("pomoDurBtn").innerText = "Durdur"; 
+            if (pMod === 'mola' && pSur > 0 && pDur) return alert("Moladasın! Önce bitir.");
+            if (pMod !== 'ders') { clearInterval(pInt); pSur = dk * 60; pMod = 'ders'; }
+            pDur = true;
+            document.getElementById("pomoDurBtn").innerText = "Durdur";
             document.getElementById("pomoDurumYazisi").innerText = "📚 DERS (" + dk + " dk)";
             sayac();
         }
         function molaBaslat() {
             let dk = parseInt(document.getElementById("pomoMolaSure").value) || 5;
-            if(pMod === 'ders' && pSur > 0 && pDur) return alert("Derstesin! Önce bitir.");
-            if(pMod !== 'mola') { clearInterval(pInt); pSur = dk * 60; pMod = 'mola'; }
-            pDur = true; document.getElementById("pomoDurBtn").innerText = "Durdur";
+            if (pMod === 'ders' && pSur > 0 && pDur) return alert("Derstesin! Önce bitir.");
+            if (pMod !== 'mola') { clearInterval(pInt); pSur = dk * 60; pMod = 'mola'; }
+            pDur = true;
+            document.getElementById("pomoDurBtn").innerText = "Durdur";
             document.getElementById("pomoDurumYazisi").innerText = "☕ MOLA (" + dk + " dk)";
             sayac();
         }
         function sayac() {
-            clearInterval(pInt); pInt = setInterval(() => {
-                pSur--; let m=Math.floor(pSur/60), s=pSur%60;
-                document.getElementById("pomoSure").innerText = `${m}:${s<10?'0':''}${s}`;
-                if(pSur<=0) { clearInterval(pInt); alert("Süre bitti!"); playSound('alarm'); pDur = false; }
+            clearInterval(pInt);
+            pInt = setInterval(() => {
+                pSur--;
+                let m = Math.floor(pSur / 60);
+                let s = pSur % 60;
+                document.getElementById("pomoSure").innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                if (pSur <= 0) {
+                    clearInterval(pInt);
+                    alert("Süre bitti!");
+                    playSound('alarm');
+                    pDur = false;
+                    gainXP(50);
+                }
             }, 1000);
         }
-        function pomoDuraklat() { if(pDur){clearInterval(pInt);pDur=false;document.getElementById("pomoDurBtn").innerText="Devam Et";}else{pDur=true;document.getElementById("pomoDurBtn").innerText="Durdur";sayac();} }
+        function pomoDuraklat() {
+            if (pDur) { clearInterval(pInt); pDur = false; document.getElementById("pomoDurBtn").innerText = "Devam Et"; }
+            else { pDur = true; document.getElementById("pomoDurBtn").innerText = "Durdur"; sayac(); }
+        }
 
-        // SATRANÇ
+        // --- SATRANÇ ---
         function botSecimiAc() { document.getElementById("anaOyunButonlari").classList.add("gizli"); document.getElementById("botSecimEkrani").classList.remove("gizli"); }
         function botSecimiKapat() { document.getElementById("botSecimEkrani").classList.add("gizli"); document.getElementById("anaOyunButonlari").classList.remove("gizli"); }
         function botBaslat(zorluk) { botZorluk = zorluk; oyunBaslat('bot'); }
 
         function oyunBaslat(mod) {
-            aktifMod = mod; document.getElementById("beklemeEkrani").classList.add("gizli"); document.getElementById("oyunAlani").classList.remove("gizli"); document.getElementById("lobiButonlari").classList.add("gizli");
-            game.reset(); wTime=600; bTime=600; baslatSatrancSayaci();
-            if(mod==='online') database.ref('game').on('value', s=>{ let v=s.val(); if(v&&v.fen!==game.fen()){game.load(v.fen); board.position(v.fen); playSound('move'); kontrolEtBittiMi(); } });
-            if(board) board.destroy();
+            aktifMod = mod;
+            document.getElementById("beklemeEkrani").classList.add("gizli");
+            document.getElementById("oyunAlani").classList.remove("gizli");
+            document.getElementById("lobiButonlari").classList.add("gizli");
+            game.reset(); wTime = 600; bTime = 600; baslatSatrancSayaci();
+            
+            if (mod === 'online') {
+                database.ref('game').on('value', s => {
+                    let v = s.val();
+                    if (v && v.fen !== game.fen()) {
+                        game.load(v.fen); board.position(v.fen); playSound('move'); kontrolEtBittiMi();
+                    }
+                });
+            }
+            if (board) board.destroy();
             board = Chessboard('myBoard', {
-                draggable: true, position: 'start',
-                pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png', 
-                orientation: myColor==='b'&&mod==='online' ? 'black' : 'white',
-                onDragStart: (s,p) => { if(game.game_over() || (mod==='online'&&game.turn()!==myColor)) return false; },
-                onDrop: (s,t) => {
-                    let m=game.move({from:s, to:t, promotion:'q'}); if(m===null) return 'snapback';
-                    if(m.captured) playSound('capture'); else playSound('move');
-                    if(mod==='online') database.ref('game').set({fen:game.fen(), turn:game.turn()});
-                    if(mod==='bot') setTimeout(()=>{ 
-                        let moves = game.moves({verbose: true}); if (game.game_over()) return;
+                draggable: true, position: 'start', pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
+                orientation: myColor === 'b' && mod === 'online' ? 'black' : 'white',
+                onDragStart: (s, p) => { if (game.game_over() || (mod === 'online' && game.turn() !== myColor)) return false; },
+                onDrop: (s, t) => {
+                    let m = game.move({ from: s, to: t, promotion: 'q' });
+                    if (m === null) return 'snapback';
+                    if (m.captured) playSound('capture'); else playSound('move');
+                    if (mod === 'online') database.ref('game').set({ fen: game.fen(), turn: game.turn() });
+                    if (mod === 'bot') setTimeout(() => {
+                        let moves = game.moves({ verbose: true });
+                        if (game.game_over()) return;
                         let move;
-                        if(botZorluk === 'zor') { let captures = moves.filter(m => m.flags.includes('c') || m.flags.includes('e')); move = captures.length > 0 ? captures[Math.floor(Math.random() * captures.length)] : moves[Math.floor(Math.random() * moves.length)]; } else { move = moves[Math.floor(Math.random() * moves.length)]; }
-                        let bm = game.move(move.san); 
-                        if(bm.captured) playSound('capture'); else playSound('move');
-                        board.position(game.fen()); kontrolEtBittiMi(); 
+                        if (botZorluk === 'zor') {
+                            let captures = moves.filter(m => m.flags.includes('c') || m.flags.includes('e'));
+                            move = captures.length > 0 ? captures[Math.floor(Math.random() * captures.length)] : moves[Math.floor(Math.random() * moves.length)];
+                        } else {
+                            move = moves[Math.floor(Math.random() * moves.length)];
+                        }
+                        let bm = game.move(move.san);
+                        if (bm.captured) playSound('capture'); else playSound('move');
+                        board.position(game.fen());
+                        kontrolEtBittiMi();
                     }, 500);
                     kontrolEtBittiMi();
                 }
             });
         }
-        function dereceliGir(){ document.getElementById("lobiButonlari").classList.add("gizli"); document.getElementById("beklemeEkrani").classList.remove("gizli"); database.ref('lobby').once('value', s=>{ let l=s.val(); if(!l||l.status==='empty'){database.ref('lobby').set({status:'waiting', p1:user}); database.ref('lobby').onDisconnect().set({status:'empty'}); myColor='w'; database.ref('lobby').on('child_changed', snap=>{if(snap.key==='status'&&snap.val()==='ready')baslatGeriSayim();});}else if(l.status==='waiting'){database.ref('lobby').update({status:'ready', p2:user}); database.ref('lobby').onDisconnect().set({status:'empty'}); myColor='b'; baslatGeriSayim();}else{alert("Lobi Dolu!");beklemeyiIptalEt();} }); }
-        function baslatGeriSayim(){ document.getElementById("beklemeIcerik").classList.add("gizli"); document.getElementById("geriSayimIcerik").classList.remove("gizli"); let c=5, i=setInterval(()=>{ c--; document.getElementById("geriSayimText").innerText=c; if(c<=0){clearInterval(i); oyunBaslat('online');} },1000); }
-        function beklemeyiIptalEt(){ database.ref('lobby').set({status:'empty'}); document.getElementById("beklemeEkrani").classList.add("gizli"); document.getElementById("lobiButonlari").classList.remove("gizli"); }
-        function baslatSatrancSayaci(){ clearInterval(chessInterval); chessInterval=setInterval(()=>{ if(game.game_over()){clearInterval(chessInterval);return;} if(game.turn()==='w'){wTime--;document.getElementById("timerW").innerHTML=`⚪ ${Math.floor(wTime/60)}:${wTime%60<10?'0':''}${wTime%60}`;document.getElementById("timerW").classList.add("timer-active");document.getElementById("timerB").classList.remove("timer-active");}else{bTime--;document.getElementById("timerB").innerHTML=`⚫ ${Math.floor(bTime/60)}:${bTime%60<10?'0':''}${bTime%60}`;document.getElementById("timerB").classList.add("timer-active");document.getElementById("timerW").classList.remove("timer-active");} if(wTime<=0||bTime<=0){clearInterval(chessInterval);alert("Süre bitti!");} },1000); }
-        
+        function dereceliGir() {
+            document.getElementById("lobiButonlari").classList.add("gizli");
+            document.getElementById("beklemeEkrani").classList.remove("gizli");
+            database.ref('lobby').once('value', s => {
+                let l = s.val();
+                if (!l || l.status === 'empty') {
+                    database.ref('lobby').set({ status: 'waiting', p1: user });
+                    database.ref('lobby').onDisconnect().set({ status: 'empty' });
+                    myColor = 'w';
+                    database.ref('lobby').on('child_changed', snap => { if (snap.key === 'status' && snap.val() === 'ready') baslatGeriSayim(); });
+                } else if (l.status === 'waiting') {
+                    database.ref('lobby').update({ status: 'ready', p2: user });
+                    database.ref('lobby').onDisconnect().set({ status: 'empty' });
+                    myColor = 'b';
+                    baslatGeriSayim();
+                } else { alert("Lobi Dolu!"); beklemeyiIptalEt(); }
+            });
+        }
+        function baslatGeriSayim() {
+            document.getElementById("beklemeIcerik").classList.add("gizli");
+            document.getElementById("geriSayimIcerik").classList.remove("gizli");
+            let c = 5;
+            let i = setInterval(() => { c--; document.getElementById("geriSayimText").innerText = c; if (c <= 0) { clearInterval(i); oyunBaslat('online'); } }, 1000);
+        }
+        function beklemeyiIptalEt() { database.ref('lobby').set({ status: 'empty' }); document.getElementById("beklemeEkrani").classList.add("gizli"); document.getElementById("lobiButonlari").classList.remove("gizli"); }
+        function baslatSatrancSayaci() {
+            clearInterval(chessInterval);
+            chessInterval = setInterval(() => {
+                if (game.game_over()) { clearInterval(chessInterval); return; }
+                if (game.turn() === 'w') {
+                    wTime--; document.getElementById("timerW").innerHTML = `⚪ ${Math.floor(wTime / 60)}:${wTime % 60 < 10 ? '0' : ''}${wTime % 60}`;
+                    document.getElementById("timerW").classList.add("timer-active"); document.getElementById("timerB").classList.remove("timer-active");
+                } else {
+                    bTime--; document.getElementById("timerB").innerHTML = `⚫ ${Math.floor(bTime / 60)}:${bTime % 60 < 10 ? '0' : ''}${bTime % 60}`;
+                    document.getElementById("timerB").classList.add("timer-active"); document.getElementById("timerW").classList.remove("timer-active");
+                }
+                if (wTime <= 0 || bTime <= 0) { clearInterval(chessInterval); alert("Süre bitti!"); }
+            }, 1000);
+        }
         function kontrolEtBittiMi() {
             if (game.game_over()) {
                 clearInterval(chessInterval);
                 let mesaj = "Oyun Bitti!", tur = "bilgi";
                 if (game.in_checkmate()) {
                     let kazanan = game.turn() === 'w' ? 'b' : 'w';
-                    if (kazanan === myColor) { mesaj = "🏆 TEBRİKLER! KAZANDINIZ!"; tur = "basarili"; playSound('notify'); puanEkle(10); } 
+                    if (kazanan === myColor) { mesaj = "🏆 TEBRİKLER! KAZANDINIZ!"; tur = "basarili"; playSound('notify'); puanEkle(10); gainXP(100); }
                     else { mesaj = "😔 MAALESEF KAYBETTİNİZ."; tur = "hata"; }
                 } else { mesaj = "🤝 BERABERE!"; }
                 bildirim(mesaj, tur);
-                if (aktifMod === 'online') database.ref('lobby').set({status: 'empty'});
+                if (aktifMod === 'online') database.ref('lobby').set({ status: 'empty' });
                 setTimeout(() => { document.getElementById("oyunAlani").classList.add("gizli"); document.getElementById("lobiButonlari").classList.remove("gizli"); game.reset(); board.position('start'); }, 3000);
             }
         }
-        function pesEt() { bildirim("🏳️ Pes ettiniz...", "hata"); if (aktifMod === 'online') database.ref('lobby').set({status: 'empty'}); setTimeout(() => { document.getElementById("oyunAlani").classList.add("gizli"); document.getElementById("lobiButonlari").classList.remove("gizli"); game.reset(); board.position('start'); }, 1000); }
-        function puanEkle(p) { let np = parseInt(document.getElementById("dashPuan").innerText) + p; document.getElementById("dashPuan").innerText = np; database.ref('users/'+auth.currentUser.uid).update({puan: np}); }
+        function pesEt() { bildirim("🏳️ Pes ettiniz...", "hata"); if (aktifMod === 'online') database.ref('lobby').set({ status: 'empty' }); setTimeout(() => { document.getElementById("oyunAlani").classList.add("gizli"); document.getElementById("lobiButonlari").classList.remove("gizli"); game.reset(); board.position('start'); }, 1000); }
+        function puanEkle(p) { let np = parseInt(document.getElementById("dashPuan").innerText) + p; document.getElementById("dashPuan").innerText = np; database.ref('users/' + auth.currentUser.uid).update({ puan: np }); }
 
-        function yukleVeriler(){ getRef('gunluk').on('child_added',s=>{let d=s.val();document.getElementById("gunlukList").insertAdjacentHTML('afterbegin',`<div class="item-card" style="display:block;"><div style="display:flex; justify-content:space-between;"><b>📅 ${d.date}</b><button class="btn btn-yesil" style="padding:5px 15px; font-size:13px;" onclick="toggleOku('${s.key}')">Oku</button></div><div id="g_${s.key}" class="gizli" style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px; color:var(--text-main);">${d.txt}</div></div>`)}); getRef('todo').on('child_added',s=>{let d=s.val();if(!document.getElementById("gorev_"+s.key)){let i=d.durum==='basarili'?'✅':(d.durum==='basarisiz'?'❌':'⏳'),st=d.durum==='basarili'?'basarili':(d.durum==='basarisiz'?'basarisiz':'');document.getElementById("todoList").innerHTML+=`<div id="gorev_${s.key}" class="item-card ${st}"><span>${d.txt} (${d.sure}sn)</span> ${i}</div>`;}}); getRef('notlar').on('child_added',s=>{let d=s.val(),r=d.sonuc>=50?'basarili':'basarisiz';document.getElementById("notListesi").innerHTML+=`<div class="item-card ${r}"><b>${d.ders}</b>: Ort: ${d.sonuc}</div>`;}); programTabloOlustur(); }
-        function oneriYolla(){ let t=document.getElementById("oneriTur").value,k=document.getElementById("oneriKonu").value,m=document.getElementById("oneriMesaj").value; if(!k||!m)return alert("Lütfen alanları doldurun!"); window.location.href=`mailto:mustafasoylemez458@gmail.com?subject=[${t}] ${k} - ${user}&body=${m}`; }
-        function gunlukEkle(){ let t=document.getElementById("gunlukIn").value; if(t){getRef('gunluk').push({txt:t,date:new Date().toLocaleDateString()});document.getElementById("gunlukIn").value="";} }
-        function toggleOku(i){ document.getElementById("g_"+i).classList.toggle("gizli"); }
-        function gorevEkle(){ let t=document.getElementById("todoIn").value,s=parseInt(document.getElementById("todoTime").value); if(!t||!s)return; let r=getRef('todo').push(); r.set({txt:t,sure:s,durum:'bekliyor'}); document.getElementById("todoIn").value=""; baslatGorevSayaci(r.key,t,s); }
-        function baslatGorevSayaci(k,t,s){ let d=document.createElement("div");d.id="tmp_"+k;d.className="item-card";d.style.borderLeftColor="#f1c40f";d.innerHTML=`<span>${t}</span> <b id="c_${k}">${s}</b> <button class="btn btn-yesil" onclick="gorevSonuc('${k}','basarili')">Bitir</button>`;document.getElementById("todoList").prepend(d);let i=setInterval(()=>{s--;let e=document.getElementById("c_"+k);if(e)e.innerText=s;if(s<=0){clearInterval(i);gorevSonuc(k,'basarisiz');}if(!document.getElementById("tmp_"+k))clearInterval(i);},1000); }
-        window.gorevSonuc=function(k,d){let e=document.getElementById("tmp_"+k);if(e)e.remove();getRef('todo/'+k).update({durum:d});}
+        // --- VERİ YÖNETİMİ ---
+        function yukleVeriler() {
+            getRef('gunluk').on('child_added', s => {
+                let d = s.val();
+                document.getElementById("gunlukList").insertAdjacentHTML('afterbegin', `<div class="item-card" style="display:block;"><div style="display:flex; justify-content:space-between;"><b>📅 ${d.date}</b><button class="btn btn-yesil" style="padding:5px 15px; font-size:13px;" onclick="toggleOku('${s.key}')">Oku</button></div><div id="g_${s.key}" class="gizli" style="margin-top:10px;border-top:1px solid var(--border);padding-top:10px; color:var(--text-main);">${d.txt}</div></div>`);
+            });
+            
+            // KANBAN VERİ YÜKLEME
+            getRef('todo').on('child_added', s => {
+                let d = s.val();
+                let col = d.durum === 'bitti' ? 'col-done' : (d.durum === 'suruyor' ? 'col-progress' : 'col-todo');
+                
+                let card = document.createElement('div');
+                card.id = "task_" + s.key;
+                card.className = "kanban-card";
+                
+                // Başarısızlık durumu
+                if(d.durum === 'basarisiz') {
+                    card.classList.add('failed');
+                } else if (d.durum === 'bitti') {
+                    card.classList.add('success');
+                }
+                
+                card.innerHTML = `
+                    <div>
+                        <strong>${d.txt}</strong> 
+                        <br>
+                        <small id="time_${s.key}" style="font-weight:bold; color:${d.durum==='basarisiz'?'red':'inherit'}">
+                            ${d.durum === 'bitti' ? 'Tamamlandı' : (d.durum === 'basarisiz' ? 'Süre Doldu!' : d.sure + ' sn')}
+                        </small>
+                    </div>
+                    <button class="btn-delete-task" onclick="gorevSil('${s.key}')"><i class="fas fa-trash"></i></button>
+                    <div class="kanban-actions">
+                        ${d.durum !== 'yapilacak' ? `<button class="k-btn" onclick="gorevTasi('${s.key}', '${d.durum}', 'geri')"><i class="fas fa-arrow-left"></i></button>` : '<div></div>'}
+                        ${(d.durum !== 'bitti' && d.durum !== 'basarisiz') ? `<button class="k-btn" onclick="gorevTasi('${s.key}', '${d.durum}', 'ileri')"><i class="fas fa-arrow-right"></i></button>` : '<div></div>'}
+                    </div>
+                `;
+                
+                if(document.getElementById("task_" + s.key)) document.getElementById("task_" + s.key).remove();
+                document.getElementById(col).appendChild(card);
+                
+                // SAYAÇ BAŞLATMA
+                if(d.durum !== 'bitti' && d.durum !== 'basarisiz' && d.sure > 0) {
+                    baslatKartSayaci(s.key, d.sure);
+                }
+                
+                updateKanbanCounts();
+            });
+            
+            getRef('todo').on('child_changed', s => {
+                if(document.getElementById("task_" + s.key)) document.getElementById("task_" + s.key).remove();
+            });
+            
+            getRef('todo').on('child_removed', s => {
+                if(document.getElementById("task_" + s.key)) document.getElementById("task_" + s.key).remove();
+                updateKanbanCounts();
+            });
+
+            getRef('notlar').on('child_added', s => {
+                let d = s.val();
+                let r = d.sonuc >= 50 ? 'basarili' : 'basarisiz';
+                document.getElementById("notListesi").innerHTML += `<div class="item-card ${r}"><b>${d.ders}</b>: Ort: ${d.sonuc}</div>`;
+            });
+
+            getRef('flashcards').on('child_added', s => {
+                let d = s.val();
+                let html = `
+                <div class="flashcard" id="card_${s.key}" onclick="this.classList.toggle('flipped')">
+                    <div class="flashcard-inner">
+                        <div class="flashcard-front">
+                            <h3>SORU</h3>
+                            <p>${d.soru}</p>
+                        </div>
+                        <div class="flashcard-back">
+                            <h3>CEVAP</h3>
+                            <p>${d.cevap}</p>
+                            <button class="btn btn-yesil" style="margin-top:10px; font-size:12px;" onclick="event.stopPropagation(); gainXP(10); bildirim('Harika! +10 XP', 'basarili');">Bildim!</button>
+                            <button class="btn-sil" onclick="kartSil('${s.key}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+                document.getElementById("flashcardList").insertAdjacentHTML('beforeend', html);
+            });
+            
+            getRef('flashcards').on('child_removed', s => {
+                let el = document.getElementById("card_" + s.key);
+                if(el) el.remove();
+            });
+            
+            programTabloOlustur();
+        }
+
+        // --- KANBAN MANTIĞI & SAYAÇ ---
+        let taskTimers = {}; 
+
+        function baslatKartSayaci(key, sure) {
+            if(taskTimers[key]) clearInterval(taskTimers[key]); 
+            
+            taskTimers[key] = setInterval(() => {
+                sure--;
+                let timeEl = document.getElementById("time_" + key);
+                if(timeEl) timeEl.innerText = sure + " sn";
+                
+                if(sure <= 0) {
+                    clearInterval(taskTimers[key]);
+                    getRef('todo/' + key).update({ durum: 'basarisiz', sure: 0 });
+                    bildirim("Bir görevin süresi doldu!", "hata");
+                }
+            }, 1000);
+        }
+
+        function gorevEkle() {
+            let t = document.getElementById("todoIn").value;
+            let s = parseInt(document.getElementById("todoTime").value);
+            
+            if (!t) {
+                alert("Görev adı giriniz!");
+                return;
+            }
+            
+            getRef('todo').push({ txt: t, sure: s || 60, durum: 'yapilacak' }); 
+            document.getElementById("todoIn").value = "";
+            document.getElementById("todoTime").value = "";
+            bildirim("Görev eklendi!", "basarili");
+        }
+
+        function gorevTasi(key, mevcutDurum, yon) {
+            let yeniDurum = mevcutDurum;
+            if (yon === 'ileri') {
+                if (mevcutDurum === 'yapilacak') {
+                    yeniDurum = 'suruyor';
+                } else if (mevcutDurum === 'suruyor') { 
+                    yeniDurum = 'bitti'; 
+                    gainXP(20); 
+                    if(taskTimers[key]) clearInterval(taskTimers[key]); 
+                }
+            } else {
+                if (mevcutDurum === 'bitti') {
+                    yeniDurum = 'suruyor';
+                } else if (mevcutDurum === 'suruyor') {
+                    yeniDurum = 'yapilacak';
+                }
+            }
+            getRef('todo/' + key).update({ durum: yeniDurum });
+        }
         
-        function notHesapla() { let d=document.getElementById("dersAdi").value,v=Number(document.getElementById("vizeNot").value),f=Number(document.getElementById("finalNot").value); if(d)getRef('notlar').push({ders:d+" (Üni)",sonuc:((v*0.4)+(f*0.6)).toFixed(1)}); }
-        function liseHesapla() { let d=document.getElementById("liseDers").value,y1=Number(document.getElementById("yazili1").value),y2=Number(document.getElementById("yazili2").value),s=Number(document.getElementById("sozlu").value); if(d)getRef('notlar').push({ders:d+" (Lise)",sonuc:((y1+y2+s)/3).toFixed(1)}); }
-        function tytHesapla() { let d=document.getElementById("tytDers").value,dr=Number(document.getElementById("tytDogru").value),yn=Number(document.getElementById("tytYanlis").value); if(d)getRef('notlar').push({ders:d+" (Net)",sonuc:(dr-(yn/4))}); }
+        function gorevSil(key) {
+            if(confirm("Bu görevi silmek istiyor musun?")) {
+                if(taskTimers[key]) clearInterval(taskTimers[key]);
+                getRef('todo/' + key).remove();
+            }
+        }
 
-        function programTabloOlustur(){ let t=document.querySelector("#programTablosu tbody");t.innerHTML=""; getRef('program').once('value',s=>{let d=s.val()||{}; ["09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00"].forEach((h,i)=>{let tr=document.createElement("tr");tr.innerHTML=`<td><b>${h}</b></td>`;for(let j=0;j<5;j++)tr.innerHTML+=`<td><input class="ders-input" id="d_${i}_${j}" value="${d['d_'+i+'_'+j]||''}"></td>`;t.appendChild(tr);});}); }
-        function programKaydet(){ let v={};document.querySelectorAll(".ders-input").forEach(i=>v[i.id]=i.value);getRef('program').set(v).then(()=>alert("Kaydedildi")); }
-        function baslatSohbet(){ database.ref('chat').on('child_added',s=>{let m=s.val(),st=m.u===user?"background:#6c5ce7;color:white;margin-left:auto;":"background:#eee;color:black;";document.getElementById("chatArea").innerHTML+=`<div style="padding:10px;margin:5px;border-radius:10px;width:fit-content;${st}"><b>${m.u}:</b> ${m.t}</div>`; playSound('notify'); document.getElementById("chatArea").scrollTop=99999;}); }
-        function chatYolla(){ let t=document.getElementById("chatIn").value;if(t){database.ref('chat').push({u:user,t:t});document.getElementById("chatIn").value="";} }
-        function sayfaGec(i){ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active")); document.querySelectorAll(".menu-item").forEach(m=>m.classList.remove("active")); document.getElementById(i).classList.add("active"); event.currentTarget.classList.add("active"); }
+        function updateKanbanCounts() {
+            document.getElementById("count-todo").innerText = document.getElementById("col-todo").children.length;
+            document.getElementById("count-progress").innerText = document.getElementById("col-progress").children.length;
+            document.getElementById("count-done").innerText = document.getElementById("col-done").children.length;
+        }
+
+        function kartEkle() {
+            let s = document.getElementById("kartSoru").value;
+            let c = document.getElementById("kartCevap").value;
+            if(s && c) {
+                getRef('flashcards').push({soru: s, cevap: c});
+                document.getElementById("kartSoru").value = "";
+                document.getElementById("kartCevap").value = "";
+                bildirim("Kart eklendi!", "basarili");
+            } else {
+                alert("Soru ve cevap yazmalısın!");
+            }
+        }
+        
+        function kartSil(key) {
+            event.stopPropagation(); 
+            if(confirm('Bu kartı silmek istediğine emin misin?')) {
+                getRef('flashcards').child(key).remove();
+                bildirim("Kart silindi.", "bilgi");
+            }
+        }
+
+        function oneriYolla() {
+            let t = document.getElementById("oneriTur").value;
+            let k = document.getElementById("oneriKonu").value;
+            let m = document.getElementById("oneriMesaj").value;
+            if (!k || !m) {
+                alert("Lütfen alanları doldurun!");
+                return;
+            }
+            window.location.href = `mailto:mustafasoylemez458@gmail.com?subject=[${t}] ${k} - ${user}&body=${m}`;
+        }
+
+        function gunlukEkle() {
+            let t = document.getElementById("gunlukIn").value;
+            if (t) {
+                getRef('gunluk').push({ txt: t, date: new Date().toLocaleDateString() });
+                document.getElementById("gunlukIn").value = "";
+            }
+        }
+
+        function toggleOku(i) {
+            document.getElementById("g_" + i).classList.toggle("gizli");
+        }
+        
+        function notHesapla() {
+            let d = document.getElementById("dersAdi").value;
+            let v = Number(document.getElementById("vizeNot").value);
+            let f = Number(document.getElementById("finalNot").value);
+            if (d) {
+                getRef('notlar').push({ ders: d + " (Üni)", sonuc: ((v * 0.4) + (f * 0.6)).toFixed(1) });
+            }
+        }
+
+        function liseHesapla() {
+            let d = document.getElementById("liseDers").value;
+            let y1 = Number(document.getElementById("yazili1").value);
+            let y2 = Number(document.getElementById("yazili2").value);
+            let s = Number(document.getElementById("sozlu").value);
+            if (d) {
+                getRef('notlar').push({ ders: d + " (Lise)", sonuc: ((y1 + y2 + s) / 3).toFixed(1) });
+            }
+        }
+
+        function tytHesapla() {
+            let d = document.getElementById("tytDers").value;
+            let dr = Number(document.getElementById("tytDogru").value);
+            let yn = Number(document.getElementById("tytYanlis").value);
+            if (d) {
+                getRef('notlar').push({ ders: d + " (Net)", sonuc: (dr - (yn / 4)) });
+            }
+        }
+
+        function programTabloOlustur() {
+            let t = document.querySelector("#programTablosu tbody");
+            t.innerHTML = "";
+            getRef('program').once('value', s => {
+                let d = s.val() || {};
+                ["09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00"].forEach((h, i) => {
+                    let tr = document.createElement("tr");
+                    tr.innerHTML = `<td><b>${h}</b></td>`;
+                    for (let j = 0; j < 5; j++) {
+                        tr.innerHTML += `<td><input class="ders-input" id="d_${i}_${j}" value="${d['d_' + i + '_' + j] || ''}"></td>`;
+                    }
+                    t.appendChild(tr);
+                });
+            });
+        }
+
+        function programKaydet() {
+            let v = {};
+            document.querySelectorAll(".ders-input").forEach(i => v[i.id] = i.value);
+            getRef('program').set(v).then(() => alert("Kaydedildi"));
+        }
+
+        function baslatSohbet() {
+            database.ref('chat').on('child_added', s => {
+                let m = s.val();
+                let st = m.u === user ? "background:#6c5ce7;color:white;margin-left:auto;" : "background:#eee;color:black;";
+                document.getElementById("chatArea").innerHTML += `<div style="padding:10px;margin:5px;border-radius:10px;width:fit-content;${st}"><b>${m.u}:</b> ${m.t}</div>`;
+                playSound('notify');
+                document.getElementById("chatArea").scrollTop = 99999;
+            });
+        }
+
+        function chatYolla() {
+            let t = document.getElementById("chatIn").value;
+            if (t) {
+                database.ref('chat').push({ u: user, t: t });
+                document.getElementById("chatIn").value = "";
+            }
+        }
+
+        function sayfaGec(i) {
+            localStorage.setItem('aktifSayfa', i);
+            document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+            document.querySelectorAll(".menu-item").forEach(m => m.classList.remove("active"));
+            document.getElementById(i).classList.add("active");
+            document.querySelectorAll(".menu-item").forEach(m => {
+                if (m.getAttribute('onclick').includes(i)) {
+                    m.classList.add("active");
+                }
+            });
+        }
     </script>
 </body>
 </html>
-
-suannd durrr <h1>sssss</h1>
