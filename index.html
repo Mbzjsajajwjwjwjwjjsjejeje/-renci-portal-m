@@ -325,7 +325,8 @@
         function oyunBaslat(mod) {
             aktifMod = mod; document.getElementById("beklemeEkrani").classList.add("gizli"); document.getElementById("oyunAlani").classList.remove("gizli"); document.getElementById("lobiButonlari").classList.add("gizli");
             game.reset(); wTime=600; bTime=600; baslatSatrancSayaci();
-            if(mod==='online') database.ref('game').on('value', s=>{ let v=s.val(); if(v&&v.fen!==game.fen()){game.load(v.fen); board.position(v.fen); kontrolEtBittiMi();} });
+            if(mod==='online') database.ref('game').on('value', s=>{ let v=s.val(); if(v&&v.fen!==game.fen()){game.load(v.fen); board.position(v.fen); kontrolEtBittiMi(); } });
+            
             if(board) board.destroy();
             board = Chessboard('myBoard', {
                 draggable: true, position: 'start',
@@ -368,4 +369,3 @@
     </script>
 </body>
 </html>
-
